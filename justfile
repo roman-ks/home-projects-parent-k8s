@@ -14,3 +14,8 @@ oci-registry:
         --namespace default \
         -f values/oci-registry.yaml
 
+gram: 
+    helm upgrade --install gram ./charts/gram \
+        --namespace default \
+        -f values/gram.yaml 
+
