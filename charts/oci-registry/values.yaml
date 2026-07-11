@@ -1,0 +1,3 @@
+oci_registry: 
+  cname: ""
+  # tlsSecretName: oci-registry-tls-secret

@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oci-registry
+  labels:
+    app: oci-registry
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: oci-registry
+  template:
+    metadata:
+      labels:
+        app: oci-registry
+        app.kubernetes.io/name: oci-registry
+    spec:
+      containers:
+      - name: oci-registry
+        image: registry:2
+        ports:
+        - containerPort: 5000
+        volumeMounts:
+        - name: oci-registry-storage
+          mountPath: /var/lib/registry
+      volumes:
+      - name: oci-registry-storage
+        persistentVolumeClaim:
+          claimName: oci-registry-pvc
+---
