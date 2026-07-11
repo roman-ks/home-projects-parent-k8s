@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pihole
+  labels:
+    app: pihole
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: pihole
+  template:
+    metadata:
+      labels:
+        app: pihole
+        app.kubernetes.io/name: pihole
+    spec:
+      containers:
+      - name: pihole
+        image: pihole/pihole:2025.11.0
+        ports:
+        - containerPort: 53
+          hostPort: 53
+          protocol: TCP
+        - containerPort: 53
+          hostPort: 53
+          protocol: UDP
+        env:
+        - name: TZ
+          value: "Europe/Kyiv"
+        - name: FTLCONF_webserver_api_password
+          value: ""
+        - name: FTLCONF_dns_listeningMode
+          value: "SINGLE"
+        - name: FTLCONF_dns_hostRecord
+          value: {{ .Values.pihole.hostname }},{{ .Values.pihole.ipAddress }}
+        - name: FTLCONF_dns_cnameRecords
+          value: {{ .Values.pihole.cnameRecords }}
+
+---

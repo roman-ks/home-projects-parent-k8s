@@ -1,0 +1,6 @@
+pihole:
+  hostname: ""
+  ipAddress: ""
+  cname: ""
+  cnameRecords: ""
+  tlsSecretName: "pihole-tls"
