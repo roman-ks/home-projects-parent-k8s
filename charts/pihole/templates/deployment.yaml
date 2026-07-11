@@ -15,6 +15,7 @@ spec:
     metadata:
       labels:
         app: pihole
+        app.kubernetes.io/name: pihole
     spec:
       containers:
       - name: pihole
@@ -33,9 +34,9 @@ spec:
           value: ""
         - name: FTLCONF_dns_listeningMode
           value: "SINGLE"
-        # - name: FTLCONF_dns_hostRecord
-        #   value: {{ .Values.pihole.hostname }}
-        # - name: FTLCONF_dns_cnameRecords
-        #   value: {{ .Values.pihole.cnameRecords }}
+        - name: FTLCONF_dns_hostRecord
+          value: {{ .Values.pihole.hostname }},{{ .Values.pihole.ipAddress }}
+        - name: FTLCONF_dns_cnameRecords
+          value: {{ .Values.pihole.cnameRecords }}
 
 ---

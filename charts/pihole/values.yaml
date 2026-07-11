@@ -1,3 +1,5 @@
 pihole:
   hostname: ""
+  ipAddress: ""
+  cname: ""
   cnameRecords: ""
