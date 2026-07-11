@@ -16,3 +16,7 @@ spec:
             name: pihole
             port:
               number: 80
+  tls:
+  - hosts:
+    - {{ .Values.pihole.cname }}  
+    secretName: {{ .Values.pihole.tlsSecretName }}

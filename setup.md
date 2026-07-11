@@ -24,5 +24,12 @@ sudo kubeclt get pods
 <!-- todo format and add exact steps -->
 copy k3s.yaml from /etc/rancher/k3s/k3s.yaml on pi to as ~/.kube/config
 
+intall helm
+sudo snap install helm --classic
 
 
+
+### Create pihole secret
+```
+kubectl create secret tls pihole-tls --cert=pihole.crt --key=pihole.key
+```
