@@ -17,6 +17,11 @@ spec:
         app: pihole
         app.kubernetes.io/name: pihole
     spec:
+      dnsPolicy: None
+      dnsConfig: 
+        nameservers:
+          - 1.1.1.1
+          - 1.0.0.1
       containers:
       - name: pihole
         image: pihole/pihole:2025.11.0
