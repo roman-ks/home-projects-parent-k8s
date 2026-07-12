@@ -11,6 +11,7 @@ bootstrap-cgroups:
     #!/usr/bin/env bash
     set -euo pipefail
     source bootstrap/lib.sh
+    ssh-keygen -R "$SSH_TARGET"  # remove any old host key so we can connect after reboot
     echo "Enabling cgroups on $SSH_TARGET (node will reboot)..."
     ssh "${SSH_OPTS[@]}" "$SSH_TARGET" 'sudo bash -s' < bootstrap/cgroups.sh
 
