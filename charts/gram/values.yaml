@@ -1,0 +1,7 @@
+gram:
+  cname: ""
+  image:
+    repository: ""
+    tag: "latest"
+  tlsSecretName: "gram-tls"
+  pvHostPath: "/mnt/pv/gram"

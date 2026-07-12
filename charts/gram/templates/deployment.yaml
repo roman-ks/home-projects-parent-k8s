@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gram
+  labels:
+    app: gram
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: gram
+  template:
+    metadata:
+      labels:
+        app: gram
+        app.kubernetes.io/name: gram
+    spec:
+      containers:
+      - name: gram
+        image: "{{ .Values.gram.image.repository }}:{{ .Values.gram.image.tag }}"
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - name: gram-storage
+          mountPath: /data
+      volumes:
+      - name: gram-storage
+        persistentVolumeClaim:
+          claimName: gram-pvc
+---

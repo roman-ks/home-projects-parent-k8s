@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gram
+
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: {{ .Values.gram.cname }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: gram
+            port:
+              number: 8000
+  tls:
+  - hosts:
+    - {{ .Values.gram.cname }}  
+    secretName: {{ .Values.gram.tlsSecretName }}

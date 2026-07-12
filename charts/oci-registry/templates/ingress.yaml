@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: oci-registry
+
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: {{ .Values.oci_registry.cname }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: oci-registry
+            port:
+              number: 5000
+  tls:
+  - hosts:
+    - {{ .Values.oci_registry.cname }}  
+    secretName: {{ .Values.oci_registry.tlsSecretName }}
