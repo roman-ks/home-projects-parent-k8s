@@ -1,3 +1,4 @@
 oci_registry: 
   cname: ""
   tlsSecretName: oci-registry-tls
+  pvHostPath: "/mnt/pv/oci-registry"
