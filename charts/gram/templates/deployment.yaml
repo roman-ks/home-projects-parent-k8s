@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: gram
-        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        image: "{{ .Values.gram.image.repository }}:{{ .Values.gram.image.tag }}"
         ports:
         - containerPort: 8000
         volumeMounts:

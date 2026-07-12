@@ -16,7 +16,7 @@ spec:
             name: oci-registry
             port:
               number: 5000
-  # tls:
-  # - hosts:
-  #   - {{ .Values.oci_registry.cname }}  
-  #   secretName: {{ .Values.oci_registry.tlsSecretName }}
+  tls:
+  - hosts:
+    - {{ .Values.oci_registry.cname }}  
+    secretName: {{ .Values.oci_registry.tlsSecretName }}

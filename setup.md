@@ -33,3 +33,10 @@ sudo snap install helm --classic
 ```
 kubectl create secret tls pihole-tls --cert=pihole.crt --key=pihole.key
 ```
+
+### Setup oci image build env
+```bash
+sudo apt install buildah
+# needed to run arm64 builds on amd64 laptop
+sudo apt install qemu-user-binfmt
+```
