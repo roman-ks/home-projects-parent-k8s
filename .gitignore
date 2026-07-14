@@ -3,3 +3,4 @@
 *.key
 values/*.yaml
 bootstrap.yaml
+*.tgz

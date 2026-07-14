@@ -23,7 +23,31 @@ gram:
         --namespace default \
         -f values/gram.yaml 
 
+authentik:
+    kubectl create namespace authentik --dry-run=client -o yaml | kubectl apply -f -
+    helm dependency update charts/authentik-wrapper
+    helm upgrade --install authentik ./charts/authentik-wrapper \
+        --namespace authentik
 
+authentik-secret:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    authentik_secret_key=$(openssl rand 60 | base64 -w 0)
+    postgresql_user=authentik
+    postgresql_password=$(openssl rand -base64 36 | tr -d '\n')
+    kubectl create secret generic authentik-secret \
+        --namespace authentik \
+        --from-literal=AUTHENTIK_SECRET_KEY="$authentik_secret_key" \
+        --from-literal=AUTHENTIK_POSTGRESQL__HOST=authentik-postgresql \
+        --from-literal=AUTHENTIK_POSTGRESQL__USER="$postgresql_user" \
+        --from-literal=AUTHENTIK_POSTGRESQL__PASSWORD="$postgresql_password" \
+        --dry-run=client -o yaml | kubectl apply -f -
+
+    kubectl create secret generic authentik-postgresql-secret \
+        --namespace authentik \
+        --from-literal=username="$postgresql_user" \
+        --from-literal=password="$postgresql_password" \
+        --dry-run=client -o yaml | kubectl apply -f -
 
 # Nothing is stored: key+cert live only in a temp dir wiped on exit. openssl runs
 # as your user (so no root-owned files), and only the CA read is elevated via

@@ -1,0 +1,29 @@
+authentik:
+  authentik:
+    existingSecret:
+      secretName: authentik-secret
+    error_reporting:
+      enabled: false
+    postgresql:
+      auth:
+        username: authentik
+
+  server:
+    ingress:
+      # Specify kubernetes ingress controller class name
+      ingressClassName: traefik
+      enabled: true
+      hosts:
+      - auth.pi.home
+
+  postgresql:
+    enabled: true
+    auth:
+      username: authentik
+      existingSecret: authentik-postgresql-secret
+      secretKeys:
+        userPasswordKey: password
+
+  blueprints:
+    configMaps:
+      - authentik-blueprints
