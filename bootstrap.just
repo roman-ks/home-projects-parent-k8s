@@ -101,3 +101,18 @@ k3s-kubeconfig:
     echo "Wrote $dest (server -> https://${HOST}:6443)"
     echo "Verifying..."
     kubectl get pods -n kube-system
+
+# Deploy the Traefik HelmChartConfig into k3s' auto-apply manifests dir.
+traefik:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    source bootstrap/lib.sh
+    src="k3s/server/manifests/traefik-config.yaml"
+    dest="/var/lib/rancher/k3s/server/manifests/traefik-config.yaml"
+    [ -f "$src" ] || { echo "ERROR: $src not found locally" >&2; exit 1; }
+    echo "Deploying $src to $SSH_TARGET:$dest..."
+    # k3s' helm-controller auto-applies anything dropped in server/manifests.
+    # Pipe the file over one ssh session into place (no scp roundtrip).
+    ssh "${SSH_OPTS[@]}" "$SSH_TARGET" \
+        "sudo mkdir -p /var/lib/rancher/k3s/server/manifests && sudo tee '$dest' >/dev/null" < "$src"
+    echo "Wrote $dest — k3s will reconcile the traefik HelmChartConfig shortly."
