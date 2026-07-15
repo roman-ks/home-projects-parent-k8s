@@ -10,8 +10,11 @@ authentik:
 
   server:
     ingress:
-      # Specify kubernetes ingress controller class name
       ingressClassName: traefik
+      tls:
+        - secretName: auth-tls
+          hosts:
+            - auth.pi.home
       enabled: true
       hosts:
       - auth.pi.home

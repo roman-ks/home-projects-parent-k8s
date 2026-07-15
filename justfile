@@ -52,13 +52,15 @@ authentik-secret:
 # Nothing is stored: key+cert live only in a temp dir wiped on exit. openssl runs
 # as your user (so no root-owned files), and only the CA read is elevated via
 # `sudo cat` through a process-substitution fd — the CA key never touches disk.
-# Generate a CA-signed leaf cert and load it straight into a k8s TLS secret.
-tls-secret:
+# Generate a CA-signed leaf cert and load it into a k8s TLS secret.
+# Optional namespace arg (empty -> "default"): `just tls-secret kube-system`.
+tls-secret namespace='':
     #!/usr/bin/env bash
     set -euo pipefail
     : "${DOMAIN:?DOMAIN missing in .env}"
     : "${ROOT_CA_CRT:?ROOT_CA_CRT missing in .env}"
     : "${ROOT_CA_KEY:?ROOT_CA_KEY missing in .env}"
+    ns='{{namespace}}'; ns="${ns:-default}"   # empty -> default namespace
     read -p "Enter service: " service
     cname="${service}.${DOMAIN}"
     sudo -v   # prime sudo so the CA reads below don't prompt mid-command
@@ -78,7 +80,8 @@ tls-secret:
         -days 825 -sha256 -extfile "$tmp/tls.ext"
     # create-or-update, so re-running just rotates the cert
     kubectl create secret tls "${service}-tls" \
+        --namespace "$ns" \
         --cert="$tmp/tls.crt" --key="$tmp/tls.key" \
         --dry-run=client -o yaml | kubectl apply -f -
-    echo "Applied secret ${service}-tls (cert for ${cname}); temp files wiped."
+    echo "Applied secret ${service}-tls in namespace '$ns' (cert for ${cname}); temp files wiped."
 
