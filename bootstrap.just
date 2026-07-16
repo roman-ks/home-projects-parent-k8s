@@ -48,6 +48,21 @@ unlock:
         echo \"drive ready at $MOUNT_POINT\"
     "
 
+# Create the PV dir on the encrypted drive for encrypted-local-path (run `unlock` first).
+pv-dir:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    source bootstrap/lib.sh
+    : "${MOUNT_POINT:?mount_point missing in bootstrap.yaml}"
+    dir="${MOUNT_POINT%/}/pv"
+    echo "Creating $dir on $SSH_TARGET..."
+    ssh "${SSH_OPTS[@]}" "$SSH_TARGET" "
+        set -e
+        mountpoint -q '$MOUNT_POINT' || { echo 'ERROR: $MOUNT_POINT is not mounted — run: just bootstrap unlock' >&2; exit 1; }
+        sudo mkdir -p '$dir'
+        echo \"ready: \$(ls -ld '$dir')\"
+    "
+
 # Write k3s config.yaml, registries.yaml and the root CA to the node.
 k3s-config:
     #!/usr/bin/env bash

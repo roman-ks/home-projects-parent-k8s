@@ -7,6 +7,10 @@ default:
     just --list
 
 
+core:
+    helm upgrade --install core ./charts/core \
+        --namespace kube-system
+
 pihole:
     helm upgrade --install pihole ./charts/pihole \
         --namespace default \

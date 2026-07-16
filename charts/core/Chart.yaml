@@ -1,0 +1,9 @@
+apiVersion: v2
+name: core
+description: >-
+  Cluster-wide core infrastructure. For now: a dedicated local-path-provisioner
+  instance and its `encrypted-local-path` StorageClass, provisioning PVs onto a
+  specific host path (e.g. an encrypted drive), separate from k3s's built-in
+  local-path provisioner.
+type: application
+version: 0.1.0

@@ -1,0 +1,16 @@
+# Dedicated local-path-provisioner instance, independent of k3s's built-in one,
+# so PVs for this StorageClass land on a specific host directory (e.g. an
+# encrypted drive) instead of k3s's default /var/lib/rancher/k3s/storage.
+localPathProvisioner:
+  # Host directory where PVs are created. Must already exist and be writable on
+  # the node (the mount point of your encrypted drive).
+  hostPath: /mnt/drive1/pv
+  # StorageClass name apps reference. Not set as cluster default on purpose.
+  storageClassName: encrypted-local-path
+  # Provisioner id — must be unique and differ from k3s's `rancher.io/local-path`
+  # so the two instances don't fight over the same PVCs.
+  provisionerName: cluster.local/encrypted-local-path
+  reclaimPolicy: Delete
+  # Pinned to the version already running in-cluster.
+  image: rancher/local-path-provisioner:v0.0.36
+  helperImage: busybox

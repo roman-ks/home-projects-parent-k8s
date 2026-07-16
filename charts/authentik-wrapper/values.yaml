@@ -39,6 +39,11 @@ authentik:
       existingSecret: authentik-postgresql-secret
       secretKeys:
         userPasswordKey: password
+    primary:
+      persistence:
+        # Provisioned by the `core` chart's dedicated provisioner onto the
+        # encrypted drive (/mnt/drive1/pv). Deploy `just core` first.
+        storageClass: encrypted-local-path
 
   blueprints:
     configMaps:
