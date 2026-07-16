@@ -1,0 +1,20 @@
+# Values are supplied at apply time from the sops-encrypted files (see the
+# `authentik-secrets` recipe), which is why these are empty placeholders:
+#   values/authentik.enc.yaml -> authentikSecret.*
+#   values/immich.enc.yaml    -> immich.oidc.*
+#   values/memos.enc.yaml     -> memos.oidc.*
+authentikSecret:
+  secretKey: ""
+  postgresql:
+    user: authentik
+    password: ""
+
+immich:
+  oidc:
+    clientId: ""
+    clientSecret: ""
+
+memos:
+  oidc:
+    clientId: ""
+    clientSecret: ""

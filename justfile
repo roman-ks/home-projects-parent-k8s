@@ -24,30 +24,41 @@ gram:
         -f values/gram.yaml 
 
 authentik:
+    #!/usr/bin/env bash
+    set -euo pipefail
     kubectl create namespace authentik --dry-run=client -o yaml | kubectl apply -f -
     helm dependency update charts/authentik-wrapper
     helm upgrade --install authentik ./charts/authentik-wrapper \
         --namespace authentik
 
+
+# Apply the authentik secrets (core config + db creds + OIDC provider client
+# creds) as a separate, secrets-only release. Values are sops-decrypted in
+# memory (never written to disk). Requires the YubiKey — run only when a secret
+# changes, not on every `just authentik` deploy.
 authentik-secret:
     #!/usr/bin/env bash
     set -euo pipefail
-    authentik_secret_key=$(openssl rand 60 | base64 -w 0)
-    postgresql_user=authentik
-    postgresql_password=$(openssl rand -base64 36 | tr -d '\n')
-    kubectl create secret generic authentik-secret \
+    # RAM-backed, user-private tmpdir; shredded on exit. Nothing hits disk.
+    tmp=$(mktemp -d "${XDG_RUNTIME_DIR:-/dev/shm}/authentik-secrets.XXXXXX")
+    trap 'rm -rf "$tmp"; stty sane 2>/dev/null || true' EXIT
+    kubectl create namespace authentik --dry-run=client -o yaml | kubectl apply -f -
+    # Decrypt each file in place, one at a time. `sops -d -i` leaves sops's stdout
+    # on the terminal (unlike `$(sops -d)` / `<(sops -d)`, which pipe it) so the
+    # YubiKey PIN + touch prompts behave exactly like a manual `sops -d`.
+    files=(authentik immich memos)
+    i=0
+    for f in "${files[@]}"; do
+        i=$((i + 1))
+        cp "values/$f.enc.yaml" "$tmp/$f.yaml"
+        echo ">>> [$i/${#files[@]}] Decrypting $f.enc.yaml — enter PIN, then tap the YubiKey when it flashes..."
+        sops -d -i "$tmp/$f.yaml"
+    done
+    helm upgrade --install authentik-secrets ./charts/authentik-secrets \
         --namespace authentik \
-        --from-literal=AUTHENTIK_SECRET_KEY="$authentik_secret_key" \
-        --from-literal=AUTHENTIK_POSTGRESQL__HOST=authentik-postgresql \
-        --from-literal=AUTHENTIK_POSTGRESQL__USER="$postgresql_user" \
-        --from-literal=AUTHENTIK_POSTGRESQL__PASSWORD="$postgresql_password" \
-        --dry-run=client -o yaml | kubectl apply -f -
-
-    kubectl create secret generic authentik-postgresql-secret \
-        --namespace authentik \
-        --from-literal=username="$postgresql_user" \
-        --from-literal=password="$postgresql_password" \
-        --dry-run=client -o yaml | kubectl apply -f -
+        -f "$tmp/authentik.yaml" \
+        -f "$tmp/immich.yaml" \
+        -f "$tmp/memos.yaml"
 
 # Nothing is stored: key+cert live only in a temp dir wiped on exit. openssl runs
 # as your user (so no root-owned files), and only the CA read is elevated via

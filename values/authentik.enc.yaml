@@ -1,0 +1,21 @@
+authentikSecret:
+    secretKey: ENC[AES256_GCM,data:slVtDH+dDdULOxU4BzoGh7fhnI5XsHBRHBLdeFUreEq4xlU7zjzxEnsQyjvO9Ju9FaT1qxBLryV/TO+I02B/mwVUEwBpENH8BKMemKXr+8A=,iv:7TqOeTe4fNP1A6f11J+JtgL0YJggyofg3Unctn2LrRI=,tag:UkK8ZWxohYSGkulNCm8SOA==,type:str]
+    postgresql:
+        user: ENC[AES256_GCM,data:orfE4QxJk2r4,iv:Up3xDH08fecN2iqBY0dH5tqzHopoWBf1nmyWGFb/eAI=,tag:dGHJ/n3sRsg7PfnmRVDgGA==,type:str]
+        password: ENC[AES256_GCM,data:JyL3To4J+IRw3ynn+WI5rUudSE3OuMD7uo34m69wEmHCSAJq22/Z804r+Bu9n8Re,iv:AKjkVb1Mn8LYNgPMqoEanQhGHTfxyGY31rArytXnOGI=,tag:4GcZ8rhUAOmi8CrUtyR5Vg==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IHBpdi1wMjU2IHJoTEtuUSBBMjlxV3hm
+            bG4vYm9HTzZoYTN2Z0hacGJrbHFrVUtsNHBIMjJIaC9GVlNaRgp0a0VtTVlnUmw0
+            VmZrUldtV2FjS1F3SjB5THgwYUhIQ1BXZHlsUHNsbkVZCi0tLSBtNkxQZXBkMXp1
+            NmtuQlZ3dTk1N0IwcUJzbjBBNkNaS3NFU0xtVFBhYlVRCpOah37GOtBwSAj+acs5
+            8A/6jfKt8gnTxl4uXXI8lYh7WABiWPZ+MgfuWDzVjqOhMHsLzJjj3+T30UPhji/L
+            99k=
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1yubikey1qw8fz5uzfj5eayrrffqdztejc5yzjvhqahpx56lglktf0lm3g8qusuup9g8
+    lastmodified: "2026-07-16T19:41:17Z"
+    mac: ENC[AES256_GCM,data:8/MWi8EBr6HM9NKbdvSgfv0FBXiUky8DHTGKbc63Nd7ToJcyi6ENF/f0YBZTEDs81psqBbQy3uvH1+4e4592o3WxQtPJ1yPBMUK9uMMY4zi2iQr5QZclCOwzQr+boTve2XRf7P1sYIYCDaUOGuFDGD+C0u20nVd11l60/Opjzfs=,iv:OtC85lR2VEybu76/XP8iATI/tQ1/DWXwEoumgs4X3Ic=,tag:/Q1y96ouQEM19mEQIWHaJg==,type:str]
+    unencrypted_suffix: _unencrypted
+    version: 3.13.2

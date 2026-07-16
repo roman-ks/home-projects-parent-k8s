@@ -1,0 +1,8 @@
+apiVersion: v2
+name: authentik-secrets
+description: >-
+  Secrets-only release for authentik: core config + PostgreSQL credentials and
+  OIDC provider client credentials. Kept separate from the authentik-wrapper
+  release so routine deploys don't need to decrypt anything (no YubiKey tap).
+type: application
+version: 0.1.0
