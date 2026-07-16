@@ -8,6 +8,19 @@ authentik:
       auth:
         username: authentik
 
+  # Applied to both the server and worker pods. Mounts the OIDC signing keypair
+  # (Secret authentik-signing-cert, from the authentik-secrets release) at /certs,
+  # where blueprints/my-app-provider.yaml reads it via `!File`.
+  global:
+    volumes:
+      - name: authentik-signing-cert
+        secret:
+          secretName: authentik-signing-cert
+    volumeMounts:
+      - name: authentik-signing-cert
+        mountPath: /certs
+        readOnly: true
+
   server:
     ingress:
       ingressClassName: traefik
