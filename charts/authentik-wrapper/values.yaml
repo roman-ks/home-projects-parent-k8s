@@ -24,6 +24,9 @@ authentik:
   server:
     ingress:
       ingressClassName: traefik
+      # cert-manager issues + auto-renews auth-tls from the internal-ca issuer.
+      annotations:
+        cert-manager.io/cluster-issuer: internal-ca
       tls:
         - secretName: auth-tls
           hosts:

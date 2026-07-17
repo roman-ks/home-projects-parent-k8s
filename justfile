@@ -11,6 +11,33 @@ core:
     helm upgrade --install core ./charts/core \
         --namespace kube-system
 
+# Install cert-manager (CRDs + controllers). Run before `pki`.
+cert-manager:
+    helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
+        --version v1.21.0 \
+        --namespace cert-manager --create-namespace \
+        --set crds.enabled=true
+
+# Deploy the internal CA ClusterIssuer (cert-manager must be installed).
+# The issuer is not Ready until the intermediate secret exists — run `pki-secret`.
+pki:
+    helm upgrade --install pki ./charts/pki \
+        --namespace cert-manager
+
+# Apply the intermediate CA (cert+key) that cert-manager signs leaf certs with,
+# from the sops-encrypted manifest (RAM-backed decrypt; YubiKey). The root key
+# stays offline — only this intermediate lives in-cluster.
+pki-secret:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    tmp=$(mktemp -d "${XDG_RUNTIME_DIR:-/dev/shm}/pki.XXXXXX")
+    trap 'rm -rf "$tmp"; stty sane 2>/dev/null || true' EXIT
+    kubectl create namespace cert-manager --dry-run=client -o yaml | kubectl apply -f -
+    cp values/pki-intermediate.enc.yaml "$tmp/intermediate.yaml"
+    echo ">>> Decrypting intermediate CA — enter PIN, then tap the YubiKey when it flashes..."
+    sops -d -i "$tmp/intermediate.yaml"
+    kubectl apply -f "$tmp/intermediate.yaml"
+
 pihole:
     helm upgrade --install pihole ./charts/pihole \
         --namespace default \
@@ -22,10 +49,18 @@ oci-registry:
         --namespace default \
         -f values/oci-registry.yaml
 
-gram: 
+gram:
     helm upgrade --install gram ./charts/gram \
         --namespace default \
-        -f values/gram.yaml 
+        -f values/gram.yaml
+
+memos:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    kubectl create namespace memos --dry-run=client -o yaml | kubectl apply -f -
+    helm upgrade --install memos ./charts/memos \
+        --namespace memos \
+        -f values/memos.yaml
 
 authentik:
     #!/usr/bin/env bash

@@ -1,0 +1,9 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: {{ .Values.issuer.name }}
+spec:
+  ca:
+    # Must live in cert-manager's namespace (the ClusterIssuer resource
+    # namespace). Holds the intermediate CA cert(+chain) and private key.
+    secretName: {{ .Values.issuer.caSecretName }}
