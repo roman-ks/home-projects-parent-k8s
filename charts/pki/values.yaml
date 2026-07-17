@@ -5,3 +5,7 @@ issuer:
   # Secret in cert-manager's namespace holding the intermediate cert(+chain) and
   # key. Created (encrypted) by `just pki-secret` — see values/pki-intermediate.enc.yaml.
   caSecretName: intermediate-ca
+
+# Self-signed issuer for keypairs outside the CA chain (e.g. OIDC token signing).
+selfSignedIssuer:
+  name: selfsigned

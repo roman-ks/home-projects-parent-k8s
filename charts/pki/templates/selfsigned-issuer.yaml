@@ -1,0 +1,8 @@
+# Self-signed issuer for standalone keypairs that don't belong to the TLS CA
+# chain (e.g. the authentik OIDC token-signing key).
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: {{ .Values.selfSignedIssuer.name }}
+spec:
+  selfSigned: {}

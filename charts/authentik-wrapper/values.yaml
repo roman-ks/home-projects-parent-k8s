@@ -9,13 +9,19 @@ authentik:
         username: authentik
 
   # Applied to both the server and worker pods. Mounts the OIDC signing keypair
-  # (Secret authentik-signing-cert, from the authentik-secrets release) at /certs,
-  # where blueprints/my-app-provider.yaml reads it via `!File`.
+  # (Secret authentik-signing-cert, minted by cert-manager — see the Certificate
+  # template) at /certs. cert-manager stores keys as tls.crt/tls.key, so they're
+  # remapped to the filenames blueprints/my-app-provider.yaml reads via `!File`.
   global:
     volumes:
       - name: authentik-signing-cert
         secret:
           secretName: authentik-signing-cert
+          items:
+            - key: tls.crt
+              path: authentik-signing.crt
+            - key: tls.key
+              path: authentik-signing.key
     volumeMounts:
       - name: authentik-signing-cert
         mountPath: /certs
@@ -51,3 +57,9 @@ authentik:
   blueprints:
     configMaps:
       - authentik-blueprints
+
+# OIDC token-signing keypair, minted by cert-manager (see templates/signing-certificate.yaml).
+signing:
+  # Self-signed issuer — the signing key is independent of the TLS CA; OIDC
+  # clients verify tokens via authentik's JWKS, not certificate chain.
+  issuerName: selfsigned

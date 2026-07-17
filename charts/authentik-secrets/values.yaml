@@ -8,18 +8,9 @@ authentikSecret:
   postgresql:
     user: authentik
     password: ""
-  # OIDC token signing keypair, mounted at /certs and imported by the blueprint
-  # as the `custom-root-ca` certificatekeypair. PEM strings (use block scalars):
-  #   signing:
-  #     crt: |
-  #       -----BEGIN CERTIFICATE-----
-  #       ...
-  #     key: |
-  #       -----BEGIN PRIVATE KEY-----
-  #       ...
-  signing:
-    crt: ""
-    key: ""
+  # NOTE: the OIDC signing keypair moved to cert-manager
+  # (charts/authentik-wrapper/templates/signing-certificate.yaml). Remove the now
+  # unused `signing:` block from values/authentik.enc.yaml.
 
 immich:
   oidc:
