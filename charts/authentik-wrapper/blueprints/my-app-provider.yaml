@@ -64,6 +64,8 @@ entries:
       issuer_mode: global
       client_id: !Env OAUTH_MEMOS_CLIENT_ID
       client_secret: !Env OAUTH_MEMOS_CLIENT_SECRET
+      grant_types:
+        - authorization_code
       redirect_uris:
         - matching_mode: strict
           url: !Format ["https://memos.%s/auth/callback", !Env DOMAIN]

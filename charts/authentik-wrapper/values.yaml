@@ -13,6 +13,11 @@ authentik:
   # template) at /certs. cert-manager stores keys as tls.crt/tls.key, so they're
   # remapped to the filenames blueprints/my-app-provider.yaml reads via `!File`.
   global:
+    # DOMAIN is read by blueprints/my-app-provider.yaml via `!Env DOMAIN` to build
+    # the OIDC redirect URIs (e.g. https://memos.<DOMAIN>/auth/callback).
+    env:
+      - name: DOMAIN
+        value: pi.home
     volumes:
       - name: authentik-signing-cert
         secret:
@@ -40,6 +45,21 @@ authentik:
       enabled: true
       hosts:
       - auth.pi.home
+    
+    livenessProbe:
+      periodSeconds: 30      # was 10
+      timeoutSeconds: 5
+    readinessProbe:
+      periodSeconds: 30      # was 10
+      timeoutSeconds: 5
+
+  worker:
+    livenessProbe:
+      periodSeconds: 60      # was 10
+      timeoutSeconds: 5
+    readinessProbe:
+      periodSeconds: 60      # was 10
+      timeoutSeconds: 5
 
   postgresql:
     enabled: true
