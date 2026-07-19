@@ -60,6 +60,18 @@ authentik:
     readinessProbe:
       periodSeconds: 60      # was 10
       timeoutSeconds: 5
+    # Override authentik's built-in default-brand blueprint with ours (blueprints
+    # are applied by the worker). Single-file subPath mount from the blueprints
+    # configmap, replacing /blueprints/default/default-brand.yaml.
+    volumes:
+      - name: default-brand
+        configMap:
+          name: authentik-blueprints
+    volumeMounts:
+      - name: default-brand
+        mountPath: /blueprints/default/default-brand.yaml
+        subPath: default-brand.yaml
+        readOnly: true
 
   postgresql:
     enabled: true

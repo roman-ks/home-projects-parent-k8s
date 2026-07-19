@@ -4,8 +4,6 @@ metadata:
   name: authentik-blueprints
 data:
 {{- range $path, $_ := .Files.Glob "blueprints/*.yaml" }}
-{{- if ne (base $path) "my-brand.yaml" }}
   {{ base $path }}: |
 {{ $.Files.Get $path | indent 4 }}
-{{- end }}
 {{- end }}
