@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: memos
+  labels:
+    app: memos
+  {{- if .Values.ingress.clusterIssuer }}
+  annotations:
+    # cert-manager mints + auto-renews the cert in .spec.tls[].secretName.
+    cert-manager.io/cluster-issuer: {{ .Values.ingress.clusterIssuer }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  tls:
+    - hosts:
+        - {{ .Values.host | quote }}
+      secretName: {{ .Values.ingress.tlsSecretName }}
+  rules:
+    - host: {{ .Values.host | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: memos
+                port:
+                  number: {{ .Values.service.port }}
