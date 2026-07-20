@@ -3,7 +3,6 @@ authentikSecret:
     postgresql:
         user: ENC[AES256_GCM,data:orfE4QxJk2r4,iv:Up3xDH08fecN2iqBY0dH5tqzHopoWBf1nmyWGFb/eAI=,tag:dGHJ/n3sRsg7PfnmRVDgGA==,type:str]
         password: ENC[AES256_GCM,data:JyL3To4J+IRw3ynn+WI5rUudSE3OuMD7uo34m69wEmHCSAJq22/Z804r+Bu9n8Re,iv:AKjkVb1Mn8LYNgPMqoEanQhGHTfxyGY31rArytXnOGI=,tag:4GcZ8rhUAOmi8CrUtyR5Vg==,type:str]
-
 sops:
     age:
         - enc: |
@@ -16,7 +15,7 @@ sops:
             99k=
             -----END AGE ENCRYPTED FILE-----
           recipient: age1yubikey1qw8fz5uzfj5eayrrffqdztejc5yzjvhqahpx56lglktf0lm3g8qusuup9g8
-    lastmodified: "2026-07-16T20:50:36Z"
-    mac: ENC[AES256_GCM,data:UWQgbf1JpKV6G+9goyvUQK3eaS+Nmmmx7A4EbXneq2pZbDryuEUWWTFNg6a30n3c3sJhTl71UXdz+8wVpM0YI5D/7qy4PvKKnjt0a42+iv4REo/UHKIwlINw8uqZgoiy7/vFrPvbsso88NXCV3ke9Emr+AyAshbmbnKwCmkKbk4=,iv:lNsEeP70mEOKoE8RRuQBH0Qa7KrgiOtASOAy/thwVSg=,tag:8uvofqMTFXScDWghzyJcvw==,type:str]
+    lastmodified: "2026-07-20T19:56:33Z"
+    mac: ENC[AES256_GCM,data:/UUQtQevpykLSQkzVmfSvG9T5JZ+wDX8iT8p066b0j0z48qWxNbHwdFbNCxAjhv5+2JRD4+4TI6++R4AKES5KE0CfwLasX2KvTexaBOB84WVEBxJqDP8oQo0VQM9jnRY153nKtPZfpUwJlx7CZ8uNnNAFgPubHN5YFiMpp/cywM=,iv:j0OM94fBEQKTKsGWAhIEH8U3nksDrT/pWw9T3sSAz94=,tag:UKJ0RJ7SOUMuCOJtjHSOCQ==,type:str]
     unencrypted_suffix: _unencrypted
     version: 3.13.2
