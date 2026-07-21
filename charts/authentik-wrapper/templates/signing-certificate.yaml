@@ -6,7 +6,6 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: authentik-signing
-  namespace: authentik
 spec:
   secretName: authentik-signing-cert
   commonName: authentik-oidc-signing
