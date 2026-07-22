@@ -1,0 +1,19 @@
+# OIDC token-signing keypair, issued by cert-manager instead of stored in git.
+# Mounted at /certs and loaded by blueprints/my-app-provider.yaml as the
+# `custom-root-ca` certificatekeypair (the OIDC signing_key). Self-signed and
+# long-lived: OIDC clients verify via authentik's JWKS, not certificate chain.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: authentik-signing
+spec:
+  secretName: authentik-signing-cert
+  commonName: authentik-oidc-signing
+  duration: 87600h    # 10y — avoid signing-key churn
+  renewBefore: 8760h  # 1y
+  privateKey:
+    algorithm: RSA
+    size: 4096
+  issuerRef:
+    name: {{ .Values.signing.issuerName }}
+    kind: ClusterIssuer

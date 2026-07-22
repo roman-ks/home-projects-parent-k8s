@@ -3,4 +3,5 @@ pihole:
   ipAddress: ""
   cname: ""
   cnameRecords: ""
+  services: []
   tlsSecretName: "pihole-tls"

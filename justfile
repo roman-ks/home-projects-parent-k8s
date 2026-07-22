@@ -7,6 +7,23 @@ default:
     just --list
 
 
+core:
+    helm upgrade --install core ./charts/core \
+        --namespace kube-system
+
+# Install cert-manager (CRDs + controllers). Run before `pki`.
+cert-manager:
+    helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
+        --version v1.21.0 \
+        --namespace cert-manager --create-namespace \
+        --set crds.enabled=true
+
+# Deploy the internal CA ClusterIssuer (cert-manager must be installed).
+# The issuer is not Ready until the intermediate secret exists — run `pki-secret`.
+pki:
+    helm upgrade --install pki ./charts/pki \
+        --namespace cert-manager
+
 pihole:
     helm upgrade --install pihole ./charts/pihole \
         --namespace default \
@@ -18,23 +35,68 @@ oci-registry:
         --namespace default \
         -f values/oci-registry.yaml
 
-gram: 
+gram:
     helm upgrade --install gram ./charts/gram \
         --namespace default \
-        -f values/gram.yaml 
+        -f values/gram.yaml
+
+memos:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    kubectl create namespace memos --dry-run=client -o yaml | kubectl apply -f -
+    helm upgrade --install memos ./charts/memos \
+        --namespace memos \
+        -f values/memos.yaml
+
+authentik:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    kubectl create namespace authentik --dry-run=client -o yaml | kubectl apply -f -
+    helm dependency update charts/authentik-wrapper
+    helm upgrade --install authentik ./charts/authentik-wrapper \
+        --namespace authentik
 
 
+# Apply the authentik secrets (core config + db creds + OIDC provider client
+# creds) as a separate, secrets-only release. Values are sops-decrypted in
+# memory (never written to disk). Requires the YubiKey — run only when a secret
+# changes, not on every `just authentik` deploy.
+authentik-secret:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    # RAM-backed, user-private tmpdir; shredded on exit. Nothing hits disk.
+    tmp=$(mktemp -d "${XDG_RUNTIME_DIR:-/dev/shm}/authentik-secrets.XXXXXX")
+    trap 'rm -rf "$tmp"; stty sane 2>/dev/null || true' EXIT
+    kubectl create namespace authentik --dry-run=client -o yaml | kubectl apply -f -
+    # Decrypt each file in place, one at a time. `sops -d -i` leaves sops's stdout
+    # on the terminal (unlike `$(sops -d)` / `<(sops -d)`, which pipe it) so the
+    # YubiKey PIN + touch prompts behave exactly like a manual `sops -d`.
+    files=(authentik immich memos)
+    i=0
+    for f in "${files[@]}"; do
+        i=$((i + 1))
+        cp "values/$f.enc.yaml" "$tmp/$f.yaml"
+        echo ">>> [$i/${#files[@]}] Decrypting $f.enc.yaml — enter PIN, then tap the YubiKey when it flashes..."
+        sops -d -i "$tmp/$f.yaml"
+    done
+    helm upgrade --install authentik-secrets ./charts/authentik-secrets \
+        --namespace authentik \
+        -f "$tmp/authentik.yaml" \
+        -f "$tmp/immich.yaml" \
+        -f "$tmp/memos.yaml"
 
 # Nothing is stored: key+cert live only in a temp dir wiped on exit. openssl runs
 # as your user (so no root-owned files), and only the CA read is elevated via
 # `sudo cat` through a process-substitution fd — the CA key never touches disk.
-# Generate a CA-signed leaf cert and load it straight into a k8s TLS secret.
-tls-secret:
+# Generate a CA-signed leaf cert and load it into a k8s TLS secret.
+# Optional namespace arg (empty -> "default"): `just tls-secret kube-system`.
+tls-secret namespace='':
     #!/usr/bin/env bash
     set -euo pipefail
     : "${DOMAIN:?DOMAIN missing in .env}"
     : "${ROOT_CA_CRT:?ROOT_CA_CRT missing in .env}"
     : "${ROOT_CA_KEY:?ROOT_CA_KEY missing in .env}"
+    ns='{{namespace}}'; ns="${ns:-default}"   # empty -> default namespace
     read -p "Enter service: " service
     cname="${service}.${DOMAIN}"
     sudo -v   # prime sudo so the CA reads below don't prompt mid-command
@@ -54,7 +116,8 @@ tls-secret:
         -days 825 -sha256 -extfile "$tmp/tls.ext"
     # create-or-update, so re-running just rotates the cert
     kubectl create secret tls "${service}-tls" \
+        --namespace "$ns" \
         --cert="$tmp/tls.crt" --key="$tmp/tls.key" \
         --dry-run=client -o yaml | kubectl apply -f -
-    echo "Applied secret ${service}-tls (cert for ${cname}); temp files wiped."
+    echo "Applied secret ${service}-tls in namespace '$ns' (cert for ${cname}); temp files wiped."
 

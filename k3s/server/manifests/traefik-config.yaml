@@ -1,0 +1,19 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |- 
+    api: 
+      dashboard: true
+    ingressRoute:
+      dashboard:
+        enabled: true
+        entryPoints: 
+          - websecure
+        matchRule: Host(`traefik.pi.home`)
+        tls:
+          secretName: traefik-tls
+          hosts:
+            - traefik.pi.home

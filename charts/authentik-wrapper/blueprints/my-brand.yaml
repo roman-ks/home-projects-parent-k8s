@@ -1,0 +1,32 @@
+# yaml-language-server: $schema=https://goauthentik.io/blueprints/schema.json
+metadata:
+  name: My - Brand
+version: 1
+entries:
+  - model: authentik_blueprints.metaapplyblueprint
+    attrs:
+      identifiers:
+        name: My - Authentication flow
+      required: false
+  - model: authentik_blueprints.metaapplyblueprint
+    attrs:
+      identifiers:
+        name: Default - Invalidation flow
+      required: false
+  - model: authentik_blueprints.metaapplyblueprint
+    attrs:
+      identifiers:
+        name: Default - User settings flow
+      required: false
+  - attrs:
+      flow_authentication:
+        !Find [authentik_flows.flow, [slug, my-authentication-flow]]
+      flow_invalidation:
+        !Find [authentik_flows.flow, [slug, default-invalidation-flow]]
+      flow_user_settings:
+        !Find [authentik_flows.flow, [slug, default-user-settings-flow]]
+    identifiers:
+      domain: my-brand
+      default: true
+    state: created
+    model: authentik_brands.brand

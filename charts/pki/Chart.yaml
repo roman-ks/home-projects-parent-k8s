@@ -1,0 +1,8 @@
+apiVersion: v2
+name: pki
+description: >-
+  Internal PKI policy: a cert-manager CA ClusterIssuer backed by an intermediate
+  CA (for *.DOMAIN). The offline root signs the intermediate; only the
+  intermediate lives in-cluster and signs every app leaf certificate.
+type: application
+version: 0.1.0

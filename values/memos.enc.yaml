@@ -1,0 +1,20 @@
+memos:
+    oidc:
+        clientId: ENC[AES256_GCM,data:8eHjVwPVcJaAqFmRnH1meQ/b5uBkM+bM9gZlcdy9gSoBtruMfnWpcfibdnrBgilg,iv:b+QQ4BcHp1CmB2yfAX0ZlO0WXhhGtbGohI4zQsr4QIA=,tag:xzNMLmri0u8Vws1wJZRBYg==,type:str]
+        clientSecret: ENC[AES256_GCM,data:4iddARkwCvDLDOJ41YdA1s+n8opgVV+beVSE2QitupyiEn+KW4l8yLlsr6BAYHzDBLVVaIy3C9nppPfelqFtCWiYxCl1bpt4u4VjcFrNcljfNtDqrLt0wm8U4K9I0n99,iv:znYfWzFDBXo2D8defI3CcozOwg2qBNegwbinCImk/BE=,tag:aS+h9JkM9Vc/Bxy8L5Rw7w==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IHBpdi1wMjU2IHJoTEtuUSBBL1kySzZJ
+            dGpFK2IrVVI4YzlTREduUFk0VDVadGVZUEhDQkczaGorRk1XVQpjMTNGTThpY3Ja
+            cm8yVTZVMFNZcDBXVkNXM1VDMngrUlE1dnB4amVZN2hjCi0tLSBBWWpUSFhiMnVs
+            UXU0R0hNU2E4TVBEejd6YSsyaCtzNGxJUEFCb3NSQStFCuIssU+a25JO+F2n8nis
+            0JkrD248QDfTL9eM2GMcBf7XEL1hFHxbZ66c+HmZ6yrRFRMdzK7IpnwJYjw7ZyTn
+            fZE=
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1yubikey1qw8fz5uzfj5eayrrffqdztejc5yzjvhqahpx56lglktf0lm3g8qusuup9g8
+    lastmodified: "2026-07-16T19:32:45Z"
+    mac: ENC[AES256_GCM,data:LM2J8/LXkiW9xLLGq6mJmK4ryiR3Cs5a9T5ktQK1TIGJ+ULqq3yWXHqL3NXecJmAyeueFLtrSkS98TuVSrOXF2D8fRC3Fww0/iiVjRXN0YGTyWAMWjfk1prDRHtgag92h7lfsiTiPhZ6utmPwjAEbi1PP3lBSORMZo385wnA8AY=,iv:La5jfsDQ/h1NxeUBrrCc7pjuM1c2m0pP49u796timpo=,tag:J4GGbWX/rL9MlatYAC6gJQ==,type:str]
+    unencrypted_suffix: _unencrypted
+    version: 3.13.2

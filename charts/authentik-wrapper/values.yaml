@@ -1,0 +1,97 @@
+authentik:
+  authentik:
+    existingSecret:
+      secretName: authentik-secret
+    error_reporting:
+      enabled: false
+    postgresql:
+      auth:
+        username: authentik
+
+  # Applied to both the server and worker pods. Mounts the OIDC signing keypair
+  # (Secret authentik-signing-cert, minted by cert-manager — see the Certificate
+  # template) at /certs. cert-manager stores keys as tls.crt/tls.key, so they're
+  # remapped to the filenames blueprints/my-app-provider.yaml reads via `!File`.
+  global:
+    # DOMAIN is read by blueprints/my-app-provider.yaml via `!Env DOMAIN` to build
+    # the OIDC redirect URIs (e.g. https://memos.<DOMAIN>/auth/callback).
+    env:
+      - name: DOMAIN
+        value: pi.home
+    volumes:
+      - name: authentik-signing-cert
+        secret:
+          secretName: authentik-signing-cert
+          items:
+            - key: tls.crt
+              path: authentik-signing.crt
+            - key: tls.key
+              path: authentik-signing.key
+    volumeMounts:
+      - name: authentik-signing-cert
+        mountPath: /certs
+        readOnly: true
+
+  server:
+    ingress:
+      ingressClassName: traefik
+      # cert-manager issues + auto-renews auth-tls from the internal-ca issuer.
+      annotations:
+        cert-manager.io/cluster-issuer: internal-ca
+      tls:
+        - secretName: auth-tls
+          hosts:
+            - auth.pi.home
+      enabled: true
+      hosts:
+      - auth.pi.home
+    
+    livenessProbe:
+      periodSeconds: 30      # was 10
+      timeoutSeconds: 5
+    readinessProbe:
+      periodSeconds: 30      # was 10
+      timeoutSeconds: 5
+
+  worker:
+    livenessProbe:
+      periodSeconds: 60      # was 10
+      timeoutSeconds: 5
+    readinessProbe:
+      periodSeconds: 60      # was 10
+      timeoutSeconds: 5
+    # Override authentik's built-in default-brand blueprint with ours (blueprints
+    # are applied by the worker). Single-file subPath mount from the blueprints
+    # configmap, replacing /blueprints/default/default-brand.yaml.
+    volumes:
+      - name: default-brand
+        configMap:
+          name: authentik-blueprints
+    volumeMounts:
+      - name: default-brand
+        mountPath: /blueprints/default/default-brand.yaml
+        subPath: default-brand.yaml
+        readOnly: true
+
+  postgresql:
+    enabled: true
+    auth:
+      username: authentik
+      existingSecret: authentik-postgresql-secret
+      secretKeys:
+        userPasswordKey: password
+    primary:
+      persistence:
+        # Provisioned by the `core` chart's dedicated provisioner onto the
+        # encrypted drive (/mnt/drive1/pv). Deploy `just core` first.
+        storageClass: encrypted-local-path
+
+  blueprints:
+    configMaps:
+      - authentik-blueprints
+
+# OIDC token-signing keypair, minted by cert-manager (see templates/signing-certificate.yaml).
+signing:
+  # Self-signed issuer — the signing key is independent of the TLS CA; OIDC
+  # clients verify tokens via authentik's JWKS, not certificate chain.
+  issuerName: selfsigned

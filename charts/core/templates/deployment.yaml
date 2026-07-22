@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: encrypted-local-path-provisioner
+  labels:
+    app: encrypted-local-path-provisioner
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: encrypted-local-path-provisioner
+  template:
+    metadata:
+      labels:
+        app: encrypted-local-path-provisioner
+    spec:
+      serviceAccountName: encrypted-local-path-provisioner
+      containers:
+        - name: local-path-provisioner
+          image: {{ .Values.localPathProvisioner.image }}
+          imagePullPolicy: IfNotPresent
+          command:
+            - local-path-provisioner
+            - start
+            - --config
+            - /etc/config/config.json
+            - --provisioner-name
+            - {{ .Values.localPathProvisioner.provisionerName }}
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/config/
+          env:
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            # Tells the provisioner where to find config.json, setup, teardown
+            # and helperPod.yaml.
+            - name: CONFIG_MOUNT_PATH
+              value: /etc/config/
+      volumes:
+        - name: config-volume
+          configMap:
+            name: encrypted-local-path-config

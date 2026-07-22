@@ -1,0 +1,80 @@
+# yaml-language-server: $schema=https://goauthentik.io/blueprints/schema.json
+version: 1
+metadata:
+  name: My - App, Provider and Outpost setup for Traefik
+entries:
+  - model: authentik_blueprints.metaapplyblueprint
+    attrs:
+      identifiers:
+        name: Default - Provider authorization flow (implicit consent)
+      required: false
+  - model: authentik_blueprints.metaapplyblueprint
+    attrs:
+      identifiers:
+        name: Default - Invalidation flow
+      required: false
+  - model: authentik_blueprints.metaapplyblueprint
+    attrs:
+      identifiers:
+        name: System - OAuth2 Provider - Scopes
+      required: false
+  - attrs:
+      access_token_validity: hours=24
+      authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+      cookie_domain: pi.home
+      external_host: https://auth.pi.home
+      intercept_header_auth: true
+      internal_host_ssl_validation: true
+      invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+      mode: forward_domain
+      name: Proxy Provider for traefik(bp)
+      property_mappings: 
+        - !Find [authentik_providers_oauth2.scopemapping, [managed, goauthentik.io/providers/proxy/scope-proxy]]
+        - !Find [authentik_providers_oauth2.scopemapping, [managed, goauthentik.io/providers/oauth2/scope-openid]]
+        - !Find [authentik_providers_oauth2.scopemapping, [managed, goauthentik.io/providers/oauth2/scope-email]]
+        - !Find [authentik_providers_oauth2.scopemapping, [managed, goauthentik.io/providers/oauth2/scope-profile]]
+        - !Find [authentik_providers_oauth2.scopemapping, [managed, goauthentik.io/providers/oauth2/scope-entitlements]]
+      refresh_token_validity: days=30
+    identifiers:
+      name: proxy-traefik-provider
+    id: proxy-traefik-provider
+    model: authentik_providers_proxy.proxyprovider
+  - attrs:
+      provider: !KeyOf proxy-traefik-provider
+      name: Proxy traefik
+    identifiers:
+      slug: proxy-traefik
+    model: authentik_core.application
+  - attrs:
+      config:
+        authentik_host: https://auth.pi.home
+        authentik_host_browser: ''
+        authentik_host_insecure: false
+        container_image: null
+        docker_labels: null
+        docker_map_ports: true
+        docker_network: null
+        kubernetes_disabled_components: []
+        kubernetes_httproute_annotations: {}
+        kubernetes_httproute_parent_refs: []
+        kubernetes_image_pull_secrets: []
+        kubernetes_ingress_annotations: {}
+        kubernetes_ingress_class_name: null
+        kubernetes_ingress_path_type: null
+        kubernetes_ingress_secret_name: authentik-outpost-tls
+        kubernetes_json_patches: null
+        kubernetes_namespace: default
+        kubernetes_replicas: 1
+        kubernetes_service_type: ClusterIP
+        log_level: info
+        object_naming_template: ak-outpost-%(name)s
+        refresh_interval: minutes=5
+      managed: goauthentik.io/outposts/embedded
+      name: authentik Embedded Outpost
+      providers:
+        - !KeyOf proxy-traefik-provider
+      type: proxy
+    identifiers:
+      name: authentik Embedded Outpost
+    model: authentik_outposts.outpost
+

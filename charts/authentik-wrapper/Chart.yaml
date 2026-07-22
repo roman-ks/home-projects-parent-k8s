@@ -1,0 +1,9 @@
+apiVersion: v2
+name: authentik-wrapper
+description: Wrapper chart for authentik to provide blueprints for deployment and configuration
+version: 0.1.0
+
+dependencies:
+  - name: authentik
+    version: 2026.5.4
+    repository: https://charts.goauthentik.io
