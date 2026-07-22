@@ -131,3 +131,41 @@ traefik:
     ssh "${SSH_OPTS[@]}" "$SSH_TARGET" \
         "sudo mkdir -p /var/lib/rancher/k3s/server/manifests && sudo tee '$dest' >/dev/null" < "$src"
     echo "Wrote $dest — k3s will reconcile the traefik HelmChartConfig shortly."
+
+# Generate an intermediate CA (signed by the offline root) and load it into
+# cert-manager as the `intermediate-ca` secret, so the `internal-ca` ClusterIssuer
+# can sign leaf certs. LOCAL openssl + kubectl (no ssh) — for testing cert-manager.
+# Run after `just cert-manager`. The root key is streamed via sudo, never on disk.
+intermediate-ca:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    : "${ROOT_CA_CRT:?ROOT_CA_CRT missing in .env}"
+    : "${ROOT_CA_KEY:?ROOT_CA_KEY missing in .env}"
+    : "${DOMAIN:?DOMAIN missing in .env}"
+    [ -f "$ROOT_CA_CRT" ] || { echo "ERROR: root CA cert not found: $ROOT_CA_CRT" >&2; exit 1; }
+    sudo -v   # prime sudo so the CA-key read below doesn't prompt mid-command
+    tmp=$(mktemp -d "${XDG_RUNTIME_DIR:-/dev/shm}/int-cert.XXXXXX")
+    trap 'rm -rf "$tmp"; stty sane 2>/dev/null || true' EXIT
+    trap 'rm -rf "$tmp"' EXIT
+    # intermediate key + CSR (generated as your user; nothing root-owned)
+    openssl genrsa -out "$tmp/int.key" 4096
+    openssl req -new -key "$tmp/int.key" -subj "/CN=${DOMAIN} intermediate CA" -out "$tmp/int.csr"
+    # CA extensions — this cert may sign leaves; pathlen:0 forbids further sub-CAs.
+    printf 'basicConstraints=critical,CA:TRUE,pathlen:0\nkeyUsage=critical,digitalSignature,cRLSign,keyCertSign\n' > "$tmp/int.ext"
+    # sign with the root CA; cert+key streamed via sudo, never written to disk
+    openssl x509 -req \
+        -in "$tmp/int.csr" \
+        -CA <(sudo cat "$ROOT_CA_CRT") \
+        -CAkey <(sudo cat "$ROOT_CA_KEY") \
+        -CAserial "$tmp/ca.srl" -CAcreateserial \
+        -out "$tmp/int.crt" \
+        -days 1825 -sha256 -extfile "$tmp/int.ext"
+    # chain served to clients = intermediate + root
+    cat "$tmp/int.crt" <(sudo cat "$ROOT_CA_CRT") > "$tmp/int.chain.crt"
+    # load into cert-manager as the CA issuer's signing secret
+    kubectl create namespace cert-manager --dry-run=client -o yaml | kubectl apply -f -
+    kubectl create secret tls intermediate-ca \
+        --namespace cert-manager \
+        --cert="$tmp/int.chain.crt" --key="$tmp/int.key" \
+        --dry-run=client -o yaml | kubectl apply -f -
+    echo "Loaded intermediate-ca secret into cert-manager (chain: intermediate + root); temp files wiped."

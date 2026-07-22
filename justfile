@@ -24,20 +24,6 @@ pki:
     helm upgrade --install pki ./charts/pki \
         --namespace cert-manager
 
-# Apply the intermediate CA (cert+key) that cert-manager signs leaf certs with,
-# from the sops-encrypted manifest (RAM-backed decrypt; YubiKey). The root key
-# stays offline — only this intermediate lives in-cluster.
-pki-secret:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    tmp=$(mktemp -d "${XDG_RUNTIME_DIR:-/dev/shm}/pki.XXXXXX")
-    trap 'rm -rf "$tmp"; stty sane 2>/dev/null || true' EXIT
-    kubectl create namespace cert-manager --dry-run=client -o yaml | kubectl apply -f -
-    cp values/pki-intermediate.enc.yaml "$tmp/intermediate.yaml"
-    echo ">>> Decrypting intermediate CA — enter PIN, then tap the YubiKey when it flashes..."
-    sops -d -i "$tmp/intermediate.yaml"
-    kubectl apply -f "$tmp/intermediate.yaml"
-
 pihole:
     helm upgrade --install pihole ./charts/pihole \
         --namespace default \
