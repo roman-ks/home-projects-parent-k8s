@@ -123,20 +123,21 @@ k3s-kubeconfig:
     echo "Verifying..."
     kubectl get pods -n kube-system
 
-# Deploy the Traefik HelmChartConfig into k3s' auto-apply manifests dir.
+# Sync k3s' auto-apply manifests (traefik HelmChartConfig + the authentik
+# forwardAuth Middleware) into the node's server/manifests dir. k3s reconciles
+# them automatically. Add a *.yaml under k3s/server/manifests/ and re-run.
 traefik:
     #!/usr/bin/env bash
     set -euo pipefail
     source bootstrap/lib.sh
-    src="k3s/server/manifests/traefik-config.yaml"
-    dest="/var/lib/rancher/k3s/server/manifests/traefik-config.yaml"
-    [ -f "$src" ] || { echo "ERROR: $src not found locally" >&2; exit 1; }
-    echo "Deploying $src to $SSH_TARGET:$dest..."
-    # k3s' helm-controller auto-applies anything dropped in server/manifests.
-    # Pipe the file over one ssh session into place (no scp roundtrip).
-    ssh "${SSH_OPTS[@]}" "$SSH_TARGET" \
-        "sudo mkdir -p /var/lib/rancher/k3s/server/manifests && sudo tee '$dest' >/dev/null" < "$src"
-    echo "Wrote $dest — k3s will reconcile the traefik HelmChartConfig shortly."
+    srcdir="k3s/server/manifests"
+    destdir="/var/lib/rancher/k3s/server/manifests"
+    ls "$srcdir"/*.yaml >/dev/null 2>&1 || { echo "ERROR: no manifests in $srcdir" >&2; exit 1; }
+    echo "Syncing $srcdir/*.yaml -> $SSH_TARGET:$destdir ..."
+    # One ssh session: stream a tar of the manifests dir and extract it as root.
+    tar -C "$srcdir" -cf - . | ssh "${SSH_OPTS[@]}" "$SSH_TARGET" \
+        "sudo mkdir -p '$destdir' && sudo tar -C '$destdir' -xf -"
+    echo "Synced $(ls "$srcdir"/*.yaml | wc -l) manifest(s) — k3s will reconcile shortly."
 
 # Generate an intermediate CA (signed by the offline root) and load it into
 # cert-manager as the `intermediate-ca` secret, so the `internal-ca` ClusterIssuer

@@ -10,9 +10,13 @@ spec:
     ingressRoute:
       dashboard:
         enabled: true
-        entryPoints: 
+        entryPoints:
           - websecure
         matchRule: Host(`traefik.pi.home`)
+        # Gate the dashboard behind authentik SSO (see authentik-forward-auth.yaml).
+        middlewares:
+          - name: authentik-forward-auth
+            namespace: kube-system
         tls:
           secretName: traefik-tls
           hosts:
