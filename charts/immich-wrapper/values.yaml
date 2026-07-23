@@ -1,6 +1,10 @@
 # ---------------------------------------------------------------------------
 # Hand-rolled postgres (immich's special image) + storage for THIS wrapper.
 # ---------------------------------------------------------------------------
+# Node that owns the local storage (kubernetes.io/hostname) — required by the
+# `local` PV nodeAffinity. Dirs must pre-exist (`just bootstrap pv-dir`).
+nodeName: raspberrypi
+
 postgres:
   image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0
   user: immich
@@ -8,17 +12,18 @@ postgres:
   # password is supplied at deploy from values/immich-config.enc.yaml (-> immich-db secret)
   secretName: immich-db
   storage:
-    hostPath: /mnt/drive1/pv/immich-postgres
+    path: /mnt/drive1/pv/immich-postgres
     size: 20Gi
 
 storage:
-  # Immich's own upload/library dir (container /usr/src/app/upload).
+  # Immich's own upload/library dir (mounted at /data). Writer.
   upload:
-    hostPath: /mnt/drive1/pv/immich-upload
+    path: /mnt/drive1/pv/immich-upload
     size: 500Gi
-  # External library — SAME host dir as the samba `imuser` share.
+  # External library — SAME path as the samba `imuser` share. Immich only READS
+  # it, so it's mounted read-only (samba is the sole writer).
   external:
-    hostPath: /mnt/drive1/pv/immich-external
+    path: /mnt/drive1/pv/immich-external
     size: 500Gi
 
 host: immich.pi.home
@@ -73,6 +78,7 @@ immich:
         existingClaim: immich-external
         globalMounts:
           - path: /mnt/external_lib
+            readOnly: true
       certs:
         enabled: true
         type: secret

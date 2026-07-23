@@ -48,19 +48,25 @@ unlock:
         echo \"drive ready at $MOUNT_POINT\"
     "
 
-# Create the PV dir on the encrypted drive for encrypted-local-path (run `unlock` first).
+# Create the PV dir + the static local-volume subdirs on the encrypted drive
+# (run `unlock` first). encrypted-local-path (dynamic) provisions under $dir/;
+# the `local` PVs (samba, immich) need their subdirs to pre-exist.
 pv-dir:
     #!/usr/bin/env bash
     set -euo pipefail
     source bootstrap/lib.sh
     : "${MOUNT_POINT:?mount_point missing in bootstrap.yaml}"
     dir="${MOUNT_POINT%/}/pv"
-    echo "Creating $dir on $SSH_TARGET..."
+    # Subdirs backing the static local-volume PVs (immich-external is shared by
+    # the samba imuser share and immich's external library).
+    subdirs="samba-user immich-external immich-upload immich-postgres"
+    echo "Creating $dir + local-volume subdirs on $SSH_TARGET..."
     ssh "${SSH_OPTS[@]}" "$SSH_TARGET" "
         set -e
         mountpoint -q '$MOUNT_POINT' || { echo 'ERROR: $MOUNT_POINT is not mounted — run: just bootstrap unlock' >&2; exit 1; }
         sudo mkdir -p '$dir'
-        echo \"ready: \$(ls -ld '$dir')\"
+        for s in $subdirs; do sudo mkdir -p \"$dir/\$s\"; done
+        echo 'PV dirs:'; ls -ld '$dir' \"$dir\"/*/
     "
 
 # Write k3s config.yaml, registries.yaml and the root CA to the node.

@@ -20,13 +20,18 @@ accounts:
     uid: 3002
     passwordKey: imuser-password
 
-# hostPath storage on the encrypted drive. Retained on uninstall.
-# `imuser` is Immich's external library — the immich release mounts the SAME
-# hostPath (a second PV/PVC in the immich namespace), so keep these paths aligned.
+# Node that owns the local storage — matched via kubernetes.io/hostname in the
+# PV nodeAffinity (required for `local` volumes).
+nodeName: raspberrypi
+
+# `local`-volume storage on the encrypted drive. Retained on uninstall. The dirs
+# must pre-exist (`just bootstrap pv-dir`) — local volumes don't auto-create.
+# `imuser` is Immich's external library — the immich release mounts the SAME path
+# (a second PV/PVC in the immich namespace, read-only), so keep these aligned.
 persistence:
   user:
-    hostPath: /mnt/drive1/pv/samba-user
+    path: /mnt/drive1/pv/samba-user
     size: 100Gi
   imuser:
-    hostPath: /mnt/drive1/pv/immich-external
+    path: /mnt/drive1/pv/immich-external
     size: 500Gi

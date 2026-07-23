@@ -17,9 +17,17 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   storageClassName: ""
-  hostPath:
-    path: {{ $cfg.hostPath }}
-    type: DirectoryOrCreate
+  local:
+    path: {{ $cfg.path }}
+  # Required for local volumes — pins consumers to the node holding the data.
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - {{ $.Values.nodeName }}
   claimRef:
     namespace: {{ $.Release.Namespace }}
     name: samba-{{ $name }}
