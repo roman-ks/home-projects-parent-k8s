@@ -1,0 +1,46 @@
+{{- $vols := dict
+  "immich-upload"   .Values.storage.upload
+  "immich-external" .Values.storage.external
+  "immich-postgres" .Values.postgres.storage -}}
+{{- range $name, $cfg := $vols }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ $name }}
+  labels:
+    app: immich
+  annotations:
+    # Never delete the data (or the PV object) on `helm uninstall`.
+    helm.sh/resource-policy: keep
+spec:
+  capacity:
+    storage: {{ $cfg.size }}
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  hostPath:
+    path: {{ $cfg.hostPath }}
+    type: DirectoryOrCreate
+  claimRef:
+    namespace: {{ $.Release.Namespace }}
+    name: {{ $name }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ $name }}
+  labels:
+    app: immich
+  annotations:
+    helm.sh/resource-policy: keep
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ""
+  volumeName: {{ $name }}
+  resources:
+    requests:
+      storage: {{ $cfg.size }}
+{{- end }}

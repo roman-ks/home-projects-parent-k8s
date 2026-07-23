@@ -1,0 +1,9 @@
+apiVersion: v2
+name: samba
+description: >-
+  SMB file server (servercontainers/samba) exposing a user share and an imuser
+  share. The imuser share is Immich's external library, so its storage is shared
+  with the immich release. Exposed on the LAN via a LoadBalancer on :445.
+type: application
+version: 0.1.0
+appVersion: "smbd-only-latest"

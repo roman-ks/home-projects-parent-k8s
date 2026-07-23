@@ -1,0 +1,47 @@
+# Immich deploy secrets + system config. Only the secret values (postgres
+# password + OIDC clientId/clientSecret) are encrypted (see .sops.yaml
+# encrypted_regex); the rest stays plaintext + diffable. Supplied to `just immich`
+# via -f. Fill, then:  sops --encrypt --in-place values/immich-config.enc.yaml
+# The OIDC creds must match values/immich.enc.yaml (the authentik provider side).
+postgres:
+    password: ENC[AES256_GCM,data:zs8/fuzWNOCUvnCDZVdMmxIAOtseChL5T3UcHe3BfY27VOTbG2wHKON3VPmXbrZ/,iv:kgSKzuKzZvEO4DZwf/BHeoSdWd/g6jLK/U0QYIKgF5k=,tag:aebKA+rU0Yuvn0i1hAYYUg==,type:str]
+immich:
+    immich:
+        configuration:
+            oauth:
+                enabled: true
+                autoRegister: true
+                autoLaunch: false
+                buttonText: Login with OAuth
+                clientId: ENC[AES256_GCM,data:3DlAZYIvPqlx3pHe+NcZG8BO7FoOV6Fo2oiPT7xyuEZ3Ki+AlFOPvv48002oNuf4,iv:FXyIjhI4F7hOewJ8LFeTzXfAcrAREIbm6fT3uLUNUp4=,tag:IXYK5iuFIWNbufzCa37nyw==,type:str]
+                clientSecret: ENC[AES256_GCM,data:Z9jf9mmr/zLkZY0SLAH6HPHbDHvub+zA90nYCgjB75mkkKfoQ2T7sv7eXQYLYzOzmhnf5sUNG4cTuM0EjldaLI197q38feEFt+N7i4gDPQI=,iv:QWVtHzqtEk4bLihxQ9Bmsg7iu9V5xoINiKh5rLgg0gA=,tag:+MVJwC5NmNna3zGGSAZoBw==,type:str]
+                issuerUrl: https://auth.pi.home/application/o/oidc-immich/.well-known/openid-configuration
+                scope: openid email profile
+                signingAlgorithm: RS256
+                profileSigningAlgorithm: none
+                roleClaim: immich_role
+                storageLabelClaim: preferred_username
+                storageQuotaClaim: immich_quota
+                tokenEndpointAuthMethod: client_secret_post
+            passwordLogin:
+                enabled: true
+            machineLearning:
+                enabled: false
+            server:
+                externalDomain: https://immich.pi.home
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IHBpdi1wMjU2IHJoTEtuUSBBcHdRMjdF
+            RmgvR1QyMkJWY0dmNGtkRFBURnFlL0szeEhvWmRBNjE2ditndwp2dVBHdzJUTUhu
+            THZVV2NoV0g1M2lmeXZES1JjSEdOMktyRW5DOTF3cWlZCi0tLSBxUmloSjJCOEZu
+            RlRnM2tzcEd0WGJ3dlY2T0NJSmhYb0JVdEZVNS96REpBCvfh/BqdHyAu5ptIrDtj
+            USTBQEjBZCMXzjnXalsrn+MaZIH52qDAfZDrf+4WyJEnqRT9MRdY+YJjzGVVF0iS
+            vuQ=
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1yubikey1qw8fz5uzfj5eayrrffqdztejc5yzjvhqahpx56lglktf0lm3g8qusuup9g8
+    encrypted_regex: ^(password|clientId|clientSecret)$
+    lastmodified: "2026-07-23T05:41:18Z"
+    mac: ENC[AES256_GCM,data:/4hAB/5RlvX51L1JRVw+eiLpF0WFTXma4azVAV8bYNOKWtCEOw2+SpTIeh5xjKvRZjCOq6hWp/cw39211KDHfVBjcEpGqpdbjHX2lBHEms6fGzulKeR3O9tJJHXQZI852u9yPa7DCznGKZuwE3OLE8MrCOU65GrM1dFTjvjnnbg=,iv:nfVKZMKJ6t0ATM7NHrhthIDBYCAWiuECRcDfwL7rqH0=,tag:A/j1Xk54DkBYf0BB740qFg==,type:str]
+    version: 3.13.2

@@ -1,0 +1,32 @@
+image:
+  repository: ghcr.io/servercontainers/samba
+  tag: smbd-only-latest
+  pullPolicy: IfNotPresent
+
+# LoadBalancer exposes SMB on the LAN via k3s servicelb (reachable at <node-ip>:445).
+service:
+  type: LoadBalancer
+  port: 445
+  # loadBalancerIP: ""   # optional: pin a LAN IP
+
+# SMB accounts. Passwords come from the `samba-accounts` secret
+# (values/samba.enc.yaml, applied by `just samba-secret`). UIDs are non-secret.
+accounts:
+  secretName: samba-accounts
+  user:
+    uid: 3001
+    passwordKey: user-password
+  imuser:
+    uid: 3002
+    passwordKey: imuser-password
+
+# hostPath storage on the encrypted drive. Retained on uninstall.
+# `imuser` is Immich's external library — the immich release mounts the SAME
+# hostPath (a second PV/PVC in the immich namespace), so keep these paths aligned.
+persistence:
+  user:
+    hostPath: /mnt/drive1/pv/samba-user
+    size: 100Gi
+  imuser:
+    hostPath: /mnt/drive1/pv/immich-external
+    size: 500Gi

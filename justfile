@@ -48,6 +48,42 @@ memos:
         --namespace memos \
         -f values/memos.yaml
 
+samba:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    kubectl create namespace samba --dry-run=client -o yaml | kubectl apply -f -
+    helm upgrade --install samba ./charts/samba --namespace samba
+
+# Apply the SMB account passwords from the sops-encrypted manifest (RAM-backed
+# decrypt; YubiKey). Run once / when a password changes.
+samba-secret:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    tmp=$(mktemp -d "${XDG_RUNTIME_DIR:-/dev/shm}/samba.XXXXXX")
+    trap 'rm -rf "$tmp"; stty sane 2>/dev/null || true' EXIT
+    kubectl create namespace samba --dry-run=client -o yaml | kubectl apply -f -
+    cp values/samba.enc.yaml "$tmp/samba.yaml"
+    echo ">>> Decrypting samba-accounts — enter PIN, then tap the YubiKey when it flashes..."
+    sops -d -i "$tmp/samba.yaml"
+    kubectl apply -f "$tmp/samba.yaml"
+
+# Deploy Immich (community chart, ML off) + its postgres. The config carries the
+# OIDC client secret + DB password, so it's sops-decrypted in memory each deploy
+# (YubiKey). OIDC creds must match values/immich.enc.yaml.
+immich:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    tmp=$(mktemp -d "${XDG_RUNTIME_DIR:-/dev/shm}/immich.XXXXXX")
+    trap 'rm -rf "$tmp"; stty sane 2>/dev/null || true' EXIT
+    kubectl create namespace immich --dry-run=client -o yaml | kubectl apply -f -
+    helm dependency build charts/immich-wrapper
+    cp values/immich-config.enc.yaml "$tmp/immich-config.yaml"
+    echo ">>> Decrypting immich config — enter PIN, then tap the YubiKey when it flashes..."
+    sops -d -i "$tmp/immich-config.yaml"
+    helm upgrade --install immich ./charts/immich-wrapper \
+        --namespace immich \
+        -f "$tmp/immich-config.yaml"
+
 authentik:
     #!/usr/bin/env bash
     set -euo pipefail

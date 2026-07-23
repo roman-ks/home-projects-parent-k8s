@@ -1,0 +1,44 @@
+{{- range $name, $cfg := .Values.persistence }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: samba-{{ $name }}
+  labels:
+    app: samba
+    share: {{ $name }}
+  annotations:
+    # Never delete the data (or the PV object) on `helm uninstall`.
+    helm.sh/resource-policy: keep
+spec:
+  capacity:
+    storage: {{ $cfg.size }}
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  hostPath:
+    path: {{ $cfg.hostPath }}
+    type: DirectoryOrCreate
+  claimRef:
+    namespace: {{ $.Release.Namespace }}
+    name: samba-{{ $name }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: samba-{{ $name }}
+  labels:
+    app: samba
+    share: {{ $name }}
+  annotations:
+    helm.sh/resource-policy: keep
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ""
+  volumeName: samba-{{ $name }}
+  resources:
+    requests:
+      storage: {{ $cfg.size }}
+{{- end }}
