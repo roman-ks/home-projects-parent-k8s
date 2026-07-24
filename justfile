@@ -84,6 +84,28 @@ immich:
         --namespace immich \
         -f "$tmp/immich-config.yaml"
 
+kopia:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    kubectl create namespace kopia --dry-run=client -o yaml | kubectl apply -f -
+    helm upgrade --install kopia ./charts/kopia \
+        --namespace kopia \
+        -f values/kopia.yaml
+
+# Apply the kopia S3 creds + repo password from the sops-encrypted manifest
+# (RAM-backed decrypt; YubiKey). For an EXISTING repo, KOPIA_PASSWORD must be the
+# original repo password. Run once / when a credential changes.
+kopia-secret:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    tmp=$(mktemp -d "${XDG_RUNTIME_DIR:-/dev/shm}/kopia.XXXXXX")
+    trap 'rm -rf "$tmp"; stty sane 2>/dev/null || true' EXIT
+    kubectl create namespace kopia --dry-run=client -o yaml | kubectl apply -f -
+    cp values/kopia.enc.yaml "$tmp/kopia.yaml"
+    echo ">>> Decrypting kopia-secrets — enter PIN, then tap the YubiKey when it flashes..."
+    sops -d -i "$tmp/kopia.yaml"
+    kubectl apply -f "$tmp/kopia.yaml"
+
 authentik:
     #!/usr/bin/env bash
     set -euo pipefail

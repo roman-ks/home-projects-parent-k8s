@@ -1,0 +1,63 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: kopia-backup
+  labels:
+    app: kopia
+spec:
+  schedule: {{ .Values.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        metadata:
+          labels:
+            app: kopia
+            component: backup
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: kopia
+              image: {{ .Values.image }}
+              # connect-or-create + policy, then snapshot. Overrides the image's
+              # kopia entrypoint so we can run the bootstrap script first.
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  sh /scripts/connect.sh
+                  echo "Creating snapshot of $KOPIA_SOURCE_PATH..."
+                  kopia snapshot create "$KOPIA_SOURCE_PATH"
+              envFrom:
+                - configMapRef:
+                    name: kopia-env
+                - secretRef:
+                    name: {{ .Values.repo.secretName }}
+              volumeMounts:
+                - name: scripts
+                  mountPath: /scripts
+                - name: config
+                  mountPath: /app/config
+                - name: cache
+                  mountPath: /app/cache
+                - name: logs
+                  mountPath: /app/logs
+                - name: source
+                  mountPath: {{ .Values.source.path }}
+                  readOnly: true
+          volumes:
+            - name: scripts
+              configMap:
+                name: kopia-scripts
+            - name: config
+              emptyDir: {}
+            - name: cache
+              emptyDir: {}
+            - name: logs
+              emptyDir: {}
+            - name: source
+              persistentVolumeClaim:
+                claimName: kopia-source
+                readOnly: true

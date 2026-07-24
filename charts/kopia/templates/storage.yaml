@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: kopia-source
+  labels:
+    app: kopia
+  annotations:
+    # Shared data (immich/samba) — never touch it on uninstall.
+    helm.sh/resource-policy: keep
+spec:
+  capacity:
+    storage: {{ .Values.source.size }}
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  local:
+    path: {{ .Values.source.hostPath }}
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - {{ .Values.nodeName }}
+  claimRef:
+    namespace: {{ .Release.Namespace }}
+    name: kopia-source
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: kopia-source
+  labels:
+    app: kopia
+  annotations:
+    helm.sh/resource-policy: keep
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ""
+  volumeName: kopia-source
+  resources:
+    requests:
+      storage: {{ .Values.source.size }}

@@ -1,6 +1,6 @@
 .env
 *.crt
 *.key
-values/*.yaml
+values/*secret*.yaml
 bootstrap.yaml
 *.tgz

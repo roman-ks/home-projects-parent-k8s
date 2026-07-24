@@ -1,0 +1,55 @@
+image: kopia/kopia:0.23.1
+
+# Node that owns the local source volume (kubernetes.io/hostname).
+nodeName: raspberrypi
+
+repo:
+  region: us-east-1
+  endpoint: s3.amazonaws.com
+  # Snapshot source identity — pin these to continue an existing repo's history
+  # (the compose install used pi-kopia / nobody). New snapshots append to the
+  # same lineage only if hostname+username+path all match.
+  hostname: pi-kopia
+  username: nobody
+  # Secret (values/kopia.enc.yaml, `just kopia-secret`) holding:
+  #   KOPIA_BUCKET, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, KOPIA_PASSWORD
+  # (the bucket lives here too so its name / AWS account id isn't in plaintext).
+  secretName: kopia-secrets
+
+source:
+  # Container path that is snapshotted — keep as /data to match the existing
+  # repo's source path for history continuity.
+  path: /data
+  # Node dir backing the read-only local PV (shared with immich/samba).
+  hostPath: /mnt/drive1/pv/immich-external
+  size: 500Gi
+
+# k8s CronJob schedule (Kopia's own scheduler is left off; k8s drives snapshots).
+schedule: "0 3 * * *"
+
+retention:
+  keepLatest: 3
+  keepDaily: 7
+  keepWeekly: 4
+  keepMonthly: 6
+  keepAnnual: 0
+
+compression: zstd
+
+# UI server (browse/restore) behind authentik SSO. Snapshots are driven by the
+# CronJob, so the server does no scheduling.
+server:
+  enabled: true
+  host: kopia.pi.home
+  port: 51515
+  ingressClassName: traefik
+  clusterIssuer: internal-ca
+  tlsSecretName: kopia-tls
+  # Traefik forwardAuth middleware (k3s/server/manifests/authentik-forward-auth.yaml).
+  authMiddleware: kube-system-authentik-forward-auth@kubernetescrd
+  # NetworkPolicy: the server is unauthenticated, so restrict who may reach its
+  # API to just Traefik (the authentik-gated ingress path). All other pods denied.
+  allowFrom:
+    namespace: kube-system
+    podLabels:
+      app.kubernetes.io/name: traefik

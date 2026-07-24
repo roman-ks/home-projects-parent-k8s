@@ -1,0 +1,120 @@
+{{- if .Values.server.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kopia-server
+  labels:
+    app: kopia
+    component: server
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: kopia
+      component: server
+  template:
+    metadata:
+      labels:
+        app: kopia
+        component: server
+    spec:
+      initContainers:
+        # connect-or-create + policy; writes repository.config to the shared
+        # config volume the server then reads.
+        - name: connect
+          image: {{ .Values.image }}
+          command: ["/bin/sh", "/scripts/connect.sh"]
+          envFrom:
+            - configMapRef:
+                name: kopia-env
+            - secretRef:
+                name: {{ .Values.repo.secretName }}
+          volumeMounts:
+            - { name: scripts, mountPath: /scripts }
+            - { name: config, mountPath: /app/config }
+            - { name: cache, mountPath: /app/cache }
+            - { name: logs, mountPath: /app/logs }
+      containers:
+        - name: kopia
+          image: {{ .Values.image }}
+          # UI only — no scheduling (the CronJob drives snapshots). TLS is
+          # terminated at traefik; auth is enforced by the forwardAuth middleware.
+          args:
+            - server
+            - start
+            - --address=0.0.0.0:{{ .Values.server.port }}
+            - --insecure
+            - --without-password
+            - --disable-csrf-token-checks
+            - --allow-extremely-dangerous-unauthenticated-server-on-the-network
+          envFrom:
+            - configMapRef:
+                name: kopia-env
+            - secretRef:
+                name: {{ .Values.repo.secretName }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.server.port }}
+          volumeMounts:
+            - { name: config, mountPath: /app/config }
+            - { name: cache, mountPath: /app/cache }
+            - { name: logs, mountPath: /app/logs }
+            - name: source
+              mountPath: {{ .Values.source.path }}
+              readOnly: true
+      volumes:
+        - { name: scripts, configMap: { name: kopia-scripts } }
+        - { name: config, emptyDir: {} }
+        - { name: cache, emptyDir: {} }
+        - { name: logs, emptyDir: {} }
+        - name: source
+          persistentVolumeClaim:
+            claimName: kopia-source
+            readOnly: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kopia-server
+  labels:
+    app: kopia
+    component: server
+spec:
+  selector:
+    app: kopia
+    component: server
+  ports:
+    - name: http
+      port: {{ .Values.server.port }}
+      targetPort: http
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kopia
+  labels:
+    app: kopia
+  annotations:
+    cert-manager.io/cluster-issuer: {{ .Values.server.clusterIssuer }}
+    # authentik SSO via the shared forwardAuth middleware.
+    traefik.ingress.kubernetes.io/router.middlewares: {{ .Values.server.authMiddleware }}
+spec:
+  ingressClassName: {{ .Values.server.ingressClassName }}
+  tls:
+    - hosts:
+        - {{ .Values.server.host | quote }}
+      secretName: {{ .Values.server.tlsSecretName }}
+  rules:
+    - host: {{ .Values.server.host | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kopia-server
+                port:
+                  number: {{ .Values.server.port }}
+{{- end }}
