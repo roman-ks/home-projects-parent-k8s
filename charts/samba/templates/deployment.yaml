@@ -29,8 +29,8 @@ spec:
             - sh
             - -c
             - |
-              chown {{ .Values.accounts.user.uid }}:{{ .Values.accounts.user.uid }} /shares/user
-              chown {{ .Values.accounts.imuser.uid }}:{{ .Values.accounts.imuser.uid }} /shares/imuser
+              chown -R {{ .Values.accounts.user.uid }}:{{ .Values.accounts.user.uid }} /shares/user
+              chown -R {{ .Values.accounts.imuser.uid }}:{{ .Values.accounts.imuser.uid }} /shares/imuser
           volumeMounts:
             - name: user
               mountPath: /shares/user
