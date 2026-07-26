@@ -26,9 +26,12 @@ immich:
             passwordLogin:
                 enabled: true
             machineLearning:
-                enabled: false
+                enabled: true
             server:
                 externalDomain: https://immich.pi.home
+            library:
+                watch:
+                    enabled: true
 sops:
     age:
         - enc: |
@@ -42,6 +45,6 @@ sops:
             -----END AGE ENCRYPTED FILE-----
           recipient: age1yubikey1qw8fz5uzfj5eayrrffqdztejc5yzjvhqahpx56lglktf0lm3g8qusuup9g8
     encrypted_regex: ^(password|clientId|clientSecret)$
-    lastmodified: "2026-07-23T05:41:18Z"
-    mac: ENC[AES256_GCM,data:/4hAB/5RlvX51L1JRVw+eiLpF0WFTXma4azVAV8bYNOKWtCEOw2+SpTIeh5xjKvRZjCOq6hWp/cw39211KDHfVBjcEpGqpdbjHX2lBHEms6fGzulKeR3O9tJJHXQZI852u9yPa7DCznGKZuwE3OLE8MrCOU65GrM1dFTjvjnnbg=,iv:nfVKZMKJ6t0ATM7NHrhthIDBYCAWiuECRcDfwL7rqH0=,tag:A/j1Xk54DkBYf0BB740qFg==,type:str]
+    lastmodified: "2026-07-26T10:40:23Z"
+    mac: ENC[AES256_GCM,data:Gco5Y6Uuhc0iBCyZ9CsOVSIJ/Pe+2YDcCJSIXT50MJFVfVjr3kZl9xmJatjn6lkHbztGjzzLUzWcJ+NNPdDxARlNqdjIArCwX1mcHgMPmdS9RG0pqKLZtuCupCCFJl58H5rziKjDAYPxWiNmyhnGyjO4dweXbXGeJsAXNMRPK30=,iv:WtELhdg8p2Mv7uwq2ZPbWgqYP+mmxO+XozUBxKyL6Y4=,tag:KXnC1p62yl1MdSI1Uzr/XA==,type:str]
     version: 3.13.2
