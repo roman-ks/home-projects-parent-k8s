@@ -5,3 +5,4 @@ pihole:
   cnameRecords: ""
   services: []
   tlsSecretName: "pihole-tls"
+  hosts: []

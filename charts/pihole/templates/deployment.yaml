@@ -49,5 +49,7 @@ spec:
           value: {{ .Values.pihole.hostname }},{{ .Values.pihole.ipAddress }}
         - name: FTLCONF_dns_cnameRecords
           value: {{ $cnames }}
+        - name: FTLCONF_dns_hosts
+          value: {{ .Values.pihole.hosts | join " " }}
 
 ---
