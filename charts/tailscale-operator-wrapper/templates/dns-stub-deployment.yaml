@@ -30,5 +30,5 @@ spec:
               containerPort: 53
               protocol: TCP
           env:
-            - name: HOST_MAP
-              value: {{ .Values.dnsStub.hostMap | quote }}
+            - name: TARGET_IP
+              value: {{ .Values.dnsStub.targetIP | quote }}

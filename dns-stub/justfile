@@ -4,7 +4,7 @@ bootstrap:
 build:
     buildah bud --layers \
         --arch arm64 \
-        -t oci-registry.pi.home/dns-stub:0.2.0 .
+        -t oci-registry.pi.home/dns-stub:0.3.0 .
 push:
     buildah push --tls-verify=false \
-        oci-registry.pi.home/dns-stub:0.2.0
+        oci-registry.pi.home/dns-stub:0.3.0

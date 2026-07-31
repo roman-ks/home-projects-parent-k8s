@@ -58,14 +58,15 @@ proxyClass:
 dnsStub:
   image:
     repository: oci-registry.pi.home/dns-stub
-    tag: "0.2.0"
-  # Both hostnames point at the same shared Traefik-tailnet target (Task 3
-  # consolidation) — direct tailnet IP now, not CNAME+magicdns-suffix (Task 5's
-  # Android CNAME-chasing fix; see ai-fluency/tailscale-tasks-v2.md Task 5).
-  # PLACEHOLDER — traefik-tailnet's real tailnet IP, unknown from here (no
-  # tailnet access). Check via the Tailscale admin console or `tailscale
-  # status` and fill in before deploying.
-  hostMap: "memos.pi.home=100.119.153.34,pi.home=100.119.153.34"
+    tag: "0.3.0"
+  # No more per-hostname map — every current and future *.pi.home name points
+  # at the same shared Traefik-tailnet target (Task 3 consolidation), so the
+  # stub just answers every query with this one IP unconditionally. Adding a
+  # new service (auth.pi.home, and whatever comes after it) needs zero
+  # changes here — only its own second Ingress, same as Memos/Auth already
+  # got. See ai-fluency/tailscale-tasks-v2.md Task 5 for why this is a direct
+  # IP, not a CNAME.
+  targetIP: "100.119.153.34"
   # This service's own tailnet name (needs exposure too — Split DNS points at
   # its tailnet IP, which requires it to be a tailnet member itself).
   hostname: dns-stub
