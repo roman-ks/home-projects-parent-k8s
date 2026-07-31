@@ -126,6 +126,45 @@ tailscale-secret:
         kubectl apply -f "$tmp/$f.yaml"
     done
 
+# Deploy the Tailscale operator. Requires `just tailscale-secret` to have been
+# run first (operator-oauth must exist before the operator pod can start).
+tailscale-operator:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    kubectl create namespace tailscale --dry-run=client -o yaml | kubectl apply -f -
+    helm dependency update charts/tailscale-operator-wrapper
+    # Two genuinely separate passes, not a retry of the same operation — see
+    # the long comment in templates/proxyclass.yaml for why. Pass 1 installs
+    # the operator + its ProxyClass CRD, with proxyClass.create=false so
+    # nothing in this pass references that CRD yet (Helm validates every
+    # object's REST mapping upfront, before applying anything — a CRD and an
+    # instance of it in the same release is a deadlock, not a race).
+    helm upgrade --install tailscale-operator ./charts/tailscale-operator-wrapper \
+        --namespace tailscale
+    # Pass 2: a fresh, later `helm` invocation does its own fresh API
+    # discovery rather than reusing whatever the first pass had cached
+    # in-process, so it sees the CRD pass 1 just registered. Still cleared
+    # explicitly first and retried a couple of times, in case discovery
+    # genuinely hasn't propagated yet by the time this runs.
+    for i in 1 2 3; do
+        rm -rf ~/.kube/cache/discovery
+        if helm upgrade --install tailscale-operator ./charts/tailscale-operator-wrapper \
+            --namespace tailscale --set proxyClass.create=true; then
+            break
+        fi
+        if [ "$i" -eq 3 ]; then
+            echo "helm upgrade --install (pass 2, proxyClass.create=true) failed after 3 attempts" >&2
+            exit 1
+        fi
+        echo ">>> Retrying pass 2 in 5s (ProxyClass CRD may still be registering)..."
+        sleep 5
+    done
+    echo ""
+    echo ">>> This host has no tailnet access, so the dns-stub's actual tailnet IP can't be"
+    echo ">>> printed here. Check it yourself (Tailscale admin console, or 'tailscale status'"
+    echo ">>> from a tailnet device) and update the Split DNS nameserver for pi.home if it"
+    echo ">>> changed (e.g. after a cluster rebuild)."
+
 
 authentik:
     #!/usr/bin/env bash

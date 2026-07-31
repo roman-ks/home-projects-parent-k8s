@@ -1,0 +1,71 @@
+tailscale-operator:
+  # No oauth.* values needed: the chart defaults to expecting a secret literally
+  # named operator-oauth in the release namespace when oauth.clientId/clientSecret
+  # are left unset (confirmed via `helm template` — CLIENT_ID_FILE/CLIENT_SECRET_FILE
+  # point at a volume mounting that exact secret name). That's the secret Task 1
+  # already created, so nothing to configure here.
+
+  # operatorConfig.defaultTags is a real YAML list. proxyConfig.defaultTags is a
+  # plain string (comma-separated for multiple tags), NOT a list — confirmed via
+  # `helm template`: writing it as a list rendered literal brackets into the
+  # PROXY_TAGS env var ("[tag:k8s]" instead of "tag:k8s"). Both values already
+  # match the chart's own defaults — kept explicit because they have to line up
+  # exactly with the tagOwners chain in the tailnet ACL ("tag:k8s-operator" owns
+  # "tag:k8s"), not because the defaults might change.
+  operatorConfig:
+    defaultTags:
+      - "tag:k8s-operator"
+  proxyConfig:
+    defaultTags: "tag:k8s"
+    # Applies the ProxyClass below (templates/proxyclass.yaml) to every
+    # Service/Ingress-created proxy by default — currently just Traefik-tailnet
+    # and the dns-stub.
+    defaultProxyClass: default
+
+  # The per-app `ingressClassName: tailscale` mechanism is not used anywhere in
+  # this repo (see ai-fluency/tailscale-tasks-v2.md Task 3 — it's the thing that
+  # broke on SNI). Disabled so it can't be reached for by accident later and
+  # rediscover the same bug.
+  ingressClass:
+    enabled: false
+
+# ProxyClass (templates/proxyclass.yaml) applied to every operator-created proxy
+# via proxyConfig.defaultProxyClass above. Requests only, no limits — the goal
+# is just to stop the proxy being evicted/starved under pressure on a small
+# Pi cluster, not to cap it; picking a limit without real load data is a guess
+# we don't need to make right now.
+#
+# create: false by default — deliberately not applied on a normal `helm
+# upgrade --install`. See the long comment in templates/proxyclass.yaml: this
+# has to be a second, separate `helm upgrade --set proxyClass.create=true`
+# run after the CRD from the first pass has registered, not part of the same
+# install. The `tailscale-operator` justfile recipe handles both passes.
+proxyClass:
+  create: false
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+
+# Not part of the tailscale-operator subchart — our own extra templates
+# (dns-stub-deployment.yaml/dns-stub-service.yaml, proxyclass.yaml) alongside
+# it, same pattern as immich-wrapper's own templates/ next to the immich
+# subchart. The tailnet-only Traefik instance (routing Memos/Samba) used to
+# live here too but moved to its own charts/traefik-tailnet chart — bundling
+# it here tangled two unrelated CRD problems (this chart's ProxyClass
+# registration race, and a Traefik Hub CRD ownership conflict with k3s's own
+# bundled Traefik) into one install.
+dnsStub:
+  image:
+    repository: oci-registry.pi.home/dns-stub
+    tag: "0.1.1"
+  # Both hostnames now point at the same shared Traefik-tailnet target (Task 3
+  # consolidation) instead of two separate proxies. Still CNAME+magicdns-suffix
+  # under the hood, not yet the direct-IP mechanism ai-fluency/tailscale-tasks-v2.md
+  # Task 5 calls for (the Android CNAME-chasing fix) — that's its own pass,
+  # not done here, this is just the target-name update Task 3 requires.
+  hostMap: "memos.pi.home=traefik-tailnet,pi.home=traefik-tailnet"
+  # This service's own tailnet name (needs exposure too — Split DNS points at
+  # its tailnet IP, which requires it to be a tailnet member itself).
+  hostname: dns-stub
+  magicdnsSuffixSecret: tailnet-magicdns-suffix
