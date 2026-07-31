@@ -1,0 +1,77 @@
+traefik:
+  ports:
+    web:
+      # Plain :80 unused — nothing here is served over unencrypted HTTP.
+      expose:
+        default: false
+    websecure:
+      exposedPort: 443
+    # Non-privileged container port mapped to the privileged exposedPort via
+    # the Service, same convention the chart already uses for websecure
+    # (8443->443) — avoids needing NET_BIND_SERVICE for Traefik's own container.
+    smb:
+      port: 8445
+      exposedPort: 445
+      protocol: TCP
+      expose:
+        default: true
+    # Dashboard/API entrypoint (chart default: port 8080, expose.default:
+    # false). Overridden to true so it's a real port on this instance's
+    # Service — needed for the main Traefik's debug route
+    # (k3s/server/manifests/ts-traefik-dashboard-debug.yaml) to reach it
+    # in-cluster. Not meant for LAN or tailnet use directly, though since
+    # tailscale.com/expose below exposes every port on this Service, it ends
+    # up tailnet-reachable too as a side effect — low-stakes (same access
+    # model as everything else this instance handles), not worth a second
+    # Service just to avoid.
+    traefik:
+      expose:
+        default: true
+  api:
+    dashboard: true
+    # api.dashboard alone doesn't serve anything — Traefik requires either
+    # this, or an explicit IngressRoute referencing api@internal, to actually
+    # activate the dashboard handler on the entrypoint (confirmed: dashboard
+    # returned a bare 404 with just api.dashboard: true set). This instance's
+    # own auto-generated dashboard IngressRoute is deliberately left disabled
+    # (api@internal can't be referenced cross-instance, which is why the
+    # actual debug route lives on the main Traefik instead, in
+    # k3s/server/manifests/) — so nothing else activates it. insecure mode
+    # (no auth) is an acceptable tradeoff here: this port isn't reachable off
+    # -cluster except through the main Traefik's own SSO-gated debug route,
+    # though any other pod in the cluster could reach it directly too.
+    insecure: true
+  # Traefik's own documented way to run two instances in one cluster without
+  # them fighting over the same IngressRoute/Ingress objects: scope this one
+  # to a namespace the main k3s Traefik never creates routing resources in,
+  # rather than ingressClass-based filtering (which Traefik's docs don't
+  # actually describe for IngressRoute CRDs, only namespace scoping).
+  providers:
+    kubernetesCRD:
+      namespaces:
+        - tailscale
+      allowCrossNamespace: true
+    kubernetesIngress:
+      namespaces:
+        - tailscale
+  # Not used at all — every route here is a Traefik-native IngressRoute/
+  # IngressRouteTCP (memos-route.yaml, samba-route.yaml), never a plain
+  # Ingress, so there's nothing for a tailscale IngressClass to match anyway.
+  ingressClass:
+    enabled: false
+  # Its own auto-generated dashboard IngressRoute (api@internal) is left
+  # disabled (chart default) deliberately — api@internal always resolves to
+  # whichever instance processes the route, so it's only reachable via this
+  # instance's own entrypoints (i.e. only over the tailnet). The LAN debug
+  # route in k3s/server/manifests/ has to reference a real Service+port
+  # instead, which is what the "traefik" entrypoint override above is for.
+  service:
+    # Not service.type — confirmed against the chart's actual values.yaml
+    # (verified after a first attempt at service.type silently did nothing
+    # and defaulted to LoadBalancer, triggering k3s's servicelb to try
+    # claiming node ports 443/8080 already held by the main Traefik).
+    spec:
+      type: ClusterIP
+    annotations:
+      tailscale.com/expose: "true"
+      tailscale.com/hostname: traefik-tailnet

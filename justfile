@@ -165,6 +165,27 @@ tailscale-operator:
     echo ">>> from a tailnet device) and update the Split DNS nameserver for pi.home if it"
     echo ">>> changed (e.g. after a cluster rebuild)."
 
+# Deploy the tailnet-only Traefik instance (routes Memos + Samba). Requires
+# `just tailscale-operator` to have already succeeded — needs the tailscale
+# namespace and the operator running to pick up this chart's
+# tailscale.com/expose annotation.
+traefik-tailnet:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    kubectl create namespace tailscale --dry-run=client -o yaml | kubectl apply -f -
+    helm dependency update charts/traefik-tailnet
+    # --skip-crds: the traefik dependency ships its own CRDs (including
+    # Traefik Hub ones we don't use at all) via Helm's crds/ folder. Every one
+    # of them, including the IngressRoute/IngressRouteTCP types this chart
+    # actually needs, already exists — owned by k3s's own bundled Traefik
+    # install (field manager "k3s"), same upstream chart lineage. Without
+    # this flag, Helm's server-side apply conflicts with that existing
+    # ownership instead of just leaving it alone.
+    helm upgrade --install traefik-tailnet ./charts/traefik-tailnet \
+        --namespace tailscale --skip-crds
+    echo ""
+    echo ">>> Debug dashboard for this instance: https://ts-traefik.pi.home (via the main"
+    echo ">>> Traefik — see k3s/server/manifests/ts-traefik-dashboard-debug.yaml)."
 
 authentik:
     #!/usr/bin/env bash
