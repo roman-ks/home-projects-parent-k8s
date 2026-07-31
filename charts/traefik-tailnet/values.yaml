@@ -41,40 +41,47 @@ traefik:
     # -cluster except through the main Traefik's own SSO-gated debug route,
     # though any other pod in the cluster could reach it directly too.
     insecure: true
-  # Traefik's own documented way to run two instances in one cluster without
-  # them fighting over the same IngressRoute/Ingress objects: scope this one
-  # to a namespace the main k3s Traefik never creates routing resources in,
-  # rather than ingressClass-based filtering (which Traefik's docs don't
-  # actually describe for IngressRoute CRDs, only namespace scoping).
   providers:
+    # Samba (IngressRouteTCP, a Traefik CRD) has no ingressClassName-style
+    # filtering available at all — Traefik's own docs recommend namespace
+    # scoping for the CRD provider specifically, confirmed via the "service
+    # does not exist" error a missing namespace produced earlier for a
+    # Service that demonstrably existed and had a ready endpoint. That
+    # scoping affects backend Service/Endpoint visibility too, not just
+    # which namespaces get watched for IngressRoute/IngressRouteTCP objects
+    # — samba's namespace needs to be listed even though it has no CRD
+    # objects of its own, just a plain Service allowCrossNamespace lets this
+    # reference.
     kubernetesCRD:
-      # samba added after confirming (via the dashboard's own "service does
-      # not exist" error, for a Service that demonstrably exists and has a
-      # ready endpoint) that this namespace list restricts more than just
-      # which namespaces get watched for IngressRoute/IngressRouteTCP
-      # objects — it scopes backend Service/Endpoint visibility too, so a
-      # cross-namespace services[].namespace reference doesn't resolve
-      # unless that namespace is listed here as well, even with
-      # allowCrossNamespace: true. Safe to add: samba's namespace has no
-      # IngressRoute/IngressRouteTCP objects of its own (just a plain
-      # Service), so this doesn't reintroduce any conflict with the main
-      # k3s Traefik over route ownership — only Service visibility changes.
-      # memos added for the same reason, same reasoning — its namespace has
-      # only a plain Ingress (a different resource, watched by the separate
-      # kubernetesIngress provider below), no IngressRoute of its own.
       namespaces:
         - tailscale
         - samba
-        - memos
       allowCrossNamespace: true
+    # Memos moved to a plain Ingress instead (charts/memos/templates/
+    # tailscale-ingress.yaml) — ingressClassName filtering for plain Ingress
+    # IS well-documented and reliable (confirmed against Traefik's reference
+    # docs), unlike the CRD provider above. No namespaces restriction needed
+    # here at all: with ingressClass set, only Ingresses whose
+    # ingressClassName/annotation matches "traefik-tailnet" are processed,
+    # cluster-wide — so a future app's Ingress just needs that one field set
+    # to be picked up, no chart change here required. This also means the
+    # main k3s Traefik needs no changes: its own ingressClass is unset,
+    # which per the same docs means it only processes ingresses that are
+    # unset, blank, or literally "traefik" — "traefik-tailnet" already
+    # doesn't match that, so it was never going to see this one.
     kubernetesIngress:
-      namespaces:
-        - tailscale
-  # Not used at all — every route here is a Traefik-native IngressRoute/
-  # IngressRouteTCP (memos-route.yaml, samba-route.yaml), never a plain
-  # Ingress, so there's nothing for a tailscale IngressClass to match anyway.
+      ingressClass: traefik-tailnet
+  # Real IngressClass object needed for the ingressClassName: traefik-tailnet
+  # references above to resolve properly (Traefik's own docs describe the
+  # filter as matching "the IngressClass resource name"). isDefaultClass:
+  # false — main Traefik's own "traefik" IngressClass is already the
+  # cluster's default; every resource here sets ingressClassName explicitly
+  # anyway, but two IngressClass objects both claiming default is asking for
+  # ambiguity for no reason.
   ingressClass:
-    enabled: false
+    enabled: true
+    isDefaultClass: false
+    name: traefik-tailnet
   # Its own auto-generated dashboard IngressRoute (api@internal) is left
   # disabled (chart default) deliberately — api@internal always resolves to
   # whichever instance processes the route, so it's only reachable via this

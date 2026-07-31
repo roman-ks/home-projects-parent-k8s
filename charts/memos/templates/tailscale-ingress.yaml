@@ -1,0 +1,41 @@
+{{- /*
+Second Ingress, ingressClassName: traefik-tailnet (a different Traefik
+instance — see charts/traefik-tailnet), alongside the LAN one above, both
+pointing at the same backend Service. Plain Ingress here, not Traefik's
+IngressRoute CRD used for Samba — a plain Ingress can't reference a
+cross-namespace backend at all (a hard k8s API constraint, no namespace
+field), so unlike the IngressRoute this went through first, it has to live
+here with its own Service rather than in the traefik-tailnet chart. That
+turned out to be the more robust choice anyway: ingressClassName-based
+filtering is Traefik's well-documented, reliable mechanism for plain
+Ingress objects (confirmed against their reference docs) — unlike
+IngressRoute, which has no equivalent and needed namespace-scoping instead
+(see samba-route.yaml in traefik-tailnet for why that one's different).
+
+Reuses the LAN Ingress's memos-tls secret directly rather than minting a
+second cert — cert-manager only needs the issuing annotation on one Ingress
+per secret; this one just references the same secretName.
+*/ -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: memos-tailnet
+  labels:
+    app: memos
+spec:
+  ingressClassName: traefik-tailnet
+  tls:
+    - hosts:
+        - {{ .Values.host | quote }}
+      secretName: {{ .Values.ingress.tlsSecretName }}
+  rules:
+    - host: {{ .Values.host | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: memos
+                port:
+                  number: {{ .Values.service.port }}
