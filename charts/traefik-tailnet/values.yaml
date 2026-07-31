@@ -59,9 +59,13 @@ traefik:
       # IngressRoute/IngressRouteTCP objects of its own (just a plain
       # Service), so this doesn't reintroduce any conflict with the main
       # k3s Traefik over route ownership — only Service visibility changes.
+      # memos added for the same reason, same reasoning — its namespace has
+      # only a plain Ingress (a different resource, watched by the separate
+      # kubernetesIngress provider below), no IngressRoute of its own.
       namespaces:
         - tailscale
         - samba
+        - memos
       allowCrossNamespace: true
     kubernetesIngress:
       namespaces:

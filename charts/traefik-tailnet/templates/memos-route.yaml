@@ -1,0 +1,16 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: memos-tailnet
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`memos.pi.home`)
+      kind: Rule
+      services:
+        - name: memos
+          namespace: memos
+          port: 5230
+  tls:
+    secretName: memos-tailnet-tls
