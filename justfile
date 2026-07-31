@@ -106,17 +106,21 @@ kopia-secret:
     sops -d -i "$tmp/kopia.yaml"
     kubectl apply -f "$tmp/kopia.yaml"
 
-# Apply the Tailscale operator's OAuth client credentials and the tailnet
-# MagicDNS suffix secret (RAM-backed decrypt; YubiKey). Run once / when either
-# credential changes — see values/tailscale-oauth.enc.yaml and
-# values/tailscale-dns-suffix.enc.yaml for placeholder layout.
+# Apply the Tailscale operator's OAuth client credentials (RAM-backed decrypt;
+# YubiKey). Run once / when the credential changes — see
+# values/tailscale-oauth.enc.yaml for placeholder layout.
 tailscale-secret:
     #!/usr/bin/env bash
     set -euo pipefail
     tmp=$(mktemp -d "${XDG_RUNTIME_DIR:-/dev/shm}/tailscale.XXXXXX")
     trap 'rm -rf "$tmp"; stty sane 2>/dev/null || true' EXIT
     kubectl create namespace tailscale --dry-run=client -o yaml | kubectl apply -f -
-    files=(tailscale-oauth tailscale-dns-suffix)
+    # tailscale-dns-suffix dropped — the dns-stub moved from CNAME+MagicDNS-suffix
+    # targets to direct tailnet IPs (Task 5's Android CNAME-chasing fix), so this
+    # secret no longer has a consumer. Not deleted from the cluster automatically
+    # if it's already there — orphaned, not managed by anything, harmless to leave
+    # or clean up manually.
+    files=(tailscale-oauth)
     i=0
     for f in "${files[@]}"; do
         i=$((i + 1))
@@ -160,10 +164,11 @@ tailscale-operator:
         sleep 5
     done
     echo ""
-    echo ">>> This host has no tailnet access, so the dns-stub's actual tailnet IP can't be"
-    echo ">>> printed here. Check it yourself (Tailscale admin console, or 'tailscale status'"
-    echo ">>> from a tailnet device) and update the Split DNS nameserver for pi.home if it"
-    echo ">>> changed (e.g. after a cluster rebuild)."
+    echo ">>> This host has no tailnet access, so none of these can be verified from here:"
+    echo ">>> the dns-stub's own tailnet IP (Split DNS nameserver for pi.home), and every"
+    echo ">>> HOST_MAP target IP (values.yaml, dnsStub.hostMap — now hardcoded tailnet IPs,"
+    echo ">>> not CNAMEs). Check via the Tailscale admin console or 'tailscale status' from a"
+    echo ">>> tailnet device, and update whatever changed (e.g. after a cluster rebuild)."
 
 # Deploy the tailnet-only Traefik instance (routes Memos + Samba). Requires
 # `just tailscale-operator` to have already succeeded — needs the tailscale

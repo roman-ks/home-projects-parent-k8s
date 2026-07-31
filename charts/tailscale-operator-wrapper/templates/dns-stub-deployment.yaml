@@ -32,13 +32,3 @@ spec:
           env:
             - name: HOST_MAP
               value: {{ .Values.dnsStub.hostMap | quote }}
-            - name: MAGICDNS_SUFFIX_FILE
-              value: /etc/dns-stub/magicdns-suffix
-          volumeMounts:
-            - name: magicdns-suffix
-              mountPath: /etc/dns-stub
-              readOnly: true
-      volumes:
-        - name: magicdns-suffix
-          secret:
-            secretName: {{ .Values.dnsStub.magicdnsSuffixSecret }}
