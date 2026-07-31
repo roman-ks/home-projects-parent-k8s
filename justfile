@@ -106,6 +106,27 @@ kopia-secret:
     sops -d -i "$tmp/kopia.yaml"
     kubectl apply -f "$tmp/kopia.yaml"
 
+# Apply the Tailscale operator's OAuth client credentials and the tailnet
+# MagicDNS suffix secret (RAM-backed decrypt; YubiKey). Run once / when either
+# credential changes — see values/tailscale-oauth.enc.yaml and
+# values/tailscale-dns-suffix.enc.yaml for placeholder layout.
+tailscale-secret:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    tmp=$(mktemp -d "${XDG_RUNTIME_DIR:-/dev/shm}/tailscale.XXXXXX")
+    trap 'rm -rf "$tmp"; stty sane 2>/dev/null || true' EXIT
+    kubectl create namespace tailscale --dry-run=client -o yaml | kubectl apply -f -
+    files=(tailscale-oauth tailscale-dns-suffix)
+    i=0
+    for f in "${files[@]}"; do
+        i=$((i + 1))
+        cp "values/$f.enc.yaml" "$tmp/$f.yaml"
+        echo ">>> [$i/${#files[@]}] Decrypting $f.enc.yaml — enter PIN, then tap the YubiKey when it flashes..."
+        sops -d -i "$tmp/$f.yaml"
+        kubectl apply -f "$tmp/$f.yaml"
+    done
+
+
 authentik:
     #!/usr/bin/env bash
     set -euo pipefail
