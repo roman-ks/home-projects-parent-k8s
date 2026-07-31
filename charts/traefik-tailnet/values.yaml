@@ -48,8 +48,20 @@ traefik:
   # actually describe for IngressRoute CRDs, only namespace scoping).
   providers:
     kubernetesCRD:
+      # samba added after confirming (via the dashboard's own "service does
+      # not exist" error, for a Service that demonstrably exists and has a
+      # ready endpoint) that this namespace list restricts more than just
+      # which namespaces get watched for IngressRoute/IngressRouteTCP
+      # objects — it scopes backend Service/Endpoint visibility too, so a
+      # cross-namespace services[].namespace reference doesn't resolve
+      # unless that namespace is listed here as well, even with
+      # allowCrossNamespace: true. Safe to add: samba's namespace has no
+      # IngressRoute/IngressRouteTCP objects of its own (just a plain
+      # Service), so this doesn't reintroduce any conflict with the main
+      # k3s Traefik over route ownership — only Service visibility changes.
       namespaces:
         - tailscale
+        - samba
       allowCrossNamespace: true
     kubernetesIngress:
       namespaces:
