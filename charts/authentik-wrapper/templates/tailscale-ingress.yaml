@@ -1,0 +1,35 @@
+{{- /*
+Second Ingress (ingressClassName: traefik-tailnet), alongside the LAN one in
+values.yaml (server.ingress), both pointing at the same backend Service.
+Mirrors charts/memos/templates/tailscale-ingress.yaml exactly — see that file
+for why ingressClassName-based filtering (not Traefik's IngressRoute CRD) is
+the right mechanism here, and ai-fluency/tailscale-tasks-v2.md Task 3 for the
+consolidated-Traefik-instance design this plugs into.
+
+Reuses the LAN Ingress's auth-tls secret directly rather than minting a
+second cert — cert-manager only needs the issuing annotation on one Ingress
+per secret; this one just references the same secretName.
+*/ -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: authentik-tailnet
+  labels:
+    app: authentik
+spec:
+  ingressClassName: traefik-tailnet
+  tls:
+    - hosts:
+        - auth.pi.home
+      secretName: auth-tls
+  rules:
+    - host: auth.pi.home
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: authentik-server
+                port:
+                  number: 80

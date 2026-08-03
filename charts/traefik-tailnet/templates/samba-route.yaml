@@ -1,0 +1,15 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: samba-tailnet
+spec:
+  entryPoints:
+    - smb
+  routes:
+    # Catch-all — SMB isn't TLS-wrapped, so there's no SNI to route on. This
+    # entrypoint only ever carries Samba traffic anyway (dedicated :445).
+    - match: HostSNI(`*`)
+      services:
+        - name: samba
+          namespace: samba
+          port: 445
