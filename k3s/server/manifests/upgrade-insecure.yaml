@@ -1,0 +1,18 @@
+# Content-Security-Policy: upgrade-insecure-requests — tells the browser to
+# automatically upgrade any plain-http sub-resource references within an
+# already-HTTPS page to https, instead of blocking/warning on mixed content.
+# Separate from the entrypoint-level server-side redirect (which only handles
+# the initial top-level request hitting :web) — this is client-side, for
+# sub-resources referenced from within the page itself. Mirrors the
+# "upgrade-insecure" middleware from the old docker-compose Traefik setup.
+#
+# Reference it:
+#   - Ingress: traefik.ingress.kubernetes.io/router.middlewares: kube-system-upgrade-insecure@kubernetescrd
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: upgrade-insecure
+  namespace: kube-system
+spec:
+  headers:
+    contentSecurityPolicy: "upgrade-insecure-requests"

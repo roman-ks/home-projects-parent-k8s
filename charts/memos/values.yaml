@@ -20,6 +20,14 @@ persistence:
   size: 5Gi
   # memos stores its sqlite DB + assets here (container path /var/opt/memos).
 
+# Tailnet routing: templates/tailscale-ingress.yaml, a second Ingress
+# (ingressClassName: traefik-tailnet) alongside the LAN one above, both
+# pointing at the same backend. The original per-app ingressClassName:
+# tailscale approach broke on SNI (see ai-fluency/tailscale-tasks-v2.md
+# Task 3); its replacement, a shared tailnet-only Traefik instance
+# (charts/traefik-tailnet), needed this second Ingress specifically because
+# a plain Ingress can't reference a cross-namespace backend.
+
 # NOTE: memos trusts the internal CA via the ca.crt that cert-manager writes into
 # the memos-tls secret (mounted at /certs/ca.crt, SSL_CERT_FILE). No manual CA.
 

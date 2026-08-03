@@ -1,0 +1,15 @@
+{{- /*
+Same Middleware as k3s/server/manifests/upgrade-insecure.yaml, duplicated
+here rather than shared — that one lives in kube-system, which is all main
+Traefik's kubernetesCRD provider watches; this instance's own provider is
+scoped to tailscale/samba (see values.yaml), and neither scope covers the
+other. Two small, identical Middleware objects is simpler than widening
+either provider's namespace list just to share one.
+*/ -}}
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: upgrade-insecure
+spec:
+  headers:
+    contentSecurityPolicy: "upgrade-insecure-requests"

@@ -1,9 +1,21 @@
 traefik:
   ports:
     web:
-      # Plain :80 unused — nothing here is served over unencrypted HTTP.
+      # Not reachable externally (expose.default: false, so it's not even on
+      # the Service) — but the container still listens on it internally, so
+      # anything else in the cluster reaching the pod IP directly bypasses
+      # HTTPS entirely without this. Static, entrypoint-level redirect
+      # (covers all traffic landing on :web regardless of Host/path) rather
+      # than a per-Ingress middleware, which wouldn't catch unmatched/direct
+      # traffic anyway.
       expose:
         default: false
+      http:
+        redirections:
+          entryPoint:
+            to: websecure
+            scheme: https
+            permanent: true
     websecure:
       exposedPort: 443
     # Non-privileged container port mapped to the privileged exposedPort via

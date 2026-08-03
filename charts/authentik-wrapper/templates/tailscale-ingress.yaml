@@ -16,6 +16,12 @@ metadata:
   name: authentik-tailnet
   labels:
     app: authentik
+  annotations:
+    # Without this, Traefik binds the router to every entrypoint it has
+    # (web, smb, the dashboard/traefik one), not just the one that makes
+    # sense for an HTTPS Ingress — see charts/memos/templates/tailscale-ingress.yaml
+    # for the same fix and why it's needed.
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
 spec:
   ingressClassName: traefik-tailnet
   tls:
