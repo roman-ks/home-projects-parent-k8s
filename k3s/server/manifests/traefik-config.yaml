@@ -7,21 +7,11 @@ spec:
   valuesContent: |-
     api:
       dashboard: true
-    # allowCrossNamespace stays true — but note it's not actually what lets
-    # apps outside kube-system (kopia, etc.) use the shared authentik SSO
-    # middleware; that's the traefik.ingress.kubernetes.io/router.middlewares
-    # ANNOTATION on their plain Ingress objects, a separate provider
-    # (kubernetesIngress, unrestricted, unaffected by anything here). Nothing
-    # in this repo actually uses the IngressRoute/IngressRouteTCP CRDs this
-    # provider watches except this chart's own dashboard route below —
-    # scoped to kube-system so it stops picking up unrelated CRD objects in
-    # other namespaces (confirmed: charts/traefik-tailnet's samba-tailnet
-    # IngressRouteTCP was showing up here and erroring on a missing "smb"
-    # entrypoint that only exists on that other Traefik instance).
+    # Allow Ingress/IngressRoutes in any namespace to reference the shared
+    # authentik-forward-auth Middleware in kube-system (off by default). Needed
+    # for apps outside kube-system (kopia, etc.) to use SSO.
     providers:
       kubernetesCRD:
-        namespaces:
-          - kube-system
         allowCrossNamespace: true
     ingressRoute:
       dashboard:
