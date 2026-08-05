@@ -17,11 +17,11 @@ spec:
       labels:
         app: samba
     spec:
-      # The hostPath dirs are created root:root 0755, so the SMB users (UID
+      # The local-volume dirs are root:root, so the SMB users (UID
       # {{ .Values.accounts.user.uid }}/{{ .Values.accounts.imuser.uid }}) can't write.
-      # chown the top of each share so file creation works. Non-recursive: cheap,
-      # and only the dir owner needs to change for new files (existing files keep
-      # their owner — matters for the immich-shared imuser share).
+      # chown -R each share so file creation works everywhere, including files
+      # copied in out-of-band (owned by another UID). Traverses the whole share on
+      # start (metadata only); a no-op once ownership is consistent.
       initContainers:
         - name: fix-perms
           image: busybox
