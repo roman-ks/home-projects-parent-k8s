@@ -1,0 +1,9 @@
+# Non-secret config for the memos chart. Safe to commit.
+host: memos.pi.home
+
+persistence:
+  storageClass: encrypted-local-path
+  size: 5Gi
+  # Static PV (templates/persistent-volume.yaml) so kopia has a stable path to
+  # back up — dynamic provisioning would embed the PVC's UID in the dir name.
+  hostPath: /mnt/drive1/pv/memos

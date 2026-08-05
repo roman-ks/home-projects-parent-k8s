@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: memos-pv
+  annotations:
+    # Real data (sqlite db + assets) — never touch it on uninstall.
+    helm.sh/resource-policy: keep
+spec:
+  capacity:
+    storage: {{ .Values.persistence.size }}
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: {{ .Values.persistence.storageClass }}
+  hostPath:
+    path: {{ .Values.persistence.hostPath }}
+  claimRef:
+    namespace: {{ .Release.Namespace }}
+    name: memos-data

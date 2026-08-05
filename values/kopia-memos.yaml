@@ -1,0 +1,20 @@
+# Non-secret kopia config for the `memos` target — release kopia-memos.
+# Secrets (bucket, S3 creds, repo password) live in values/kopia-memos.enc.yaml.
+#
+# source.hostPath assumes the memos static-PV migration (charts/memos static
+# memos-pv at /mnt/drive1/pv/memos) is done — see docs/samba-immich-install.md.
+repo:
+  region: us-east-1
+  hostname: pi-kopia
+  username: nobody
+  secretName: kopia-memos-secrets
+
+source:
+  path: /data
+  hostPath: /mnt/drive1/pv/memos
+
+schedule: "5 3 * * *"
+
+server:
+  enabled: true
+  host: kopia-memos.pi.home

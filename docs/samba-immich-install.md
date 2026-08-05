@@ -78,6 +78,24 @@ Backup **status without the UI**: `kubectl -n kopia get jobs` (success/failure) 
 `values/kopia-<name>.yaml` (source path/hostPath, `server.host`, `repo.secretName: kopia-<name>-secrets`)
 and `values/kopia-<name>.enc.yaml` (the secret), then `just kopia-secret <name>` + `just kopia <name>`.
 
+**Current targets** (one bucket + IAM user each, same install steps as above with `<name>`
+substituted): `immich` (external library), `gram` (`values/kopia-gram.yaml` →
+`/mnt/drive1/pv/gram`, `charts/gram`'s `meals.db`), `memos` (`values/kopia-memos.yaml` →
+`/mnt/drive1/pv/memos`, `charts/memos`'s sqlite db + `assets/` — the whole PV directory is
+snapshotted in one pass, no per-file config needed).
+
+> **memos static PV.** Unlike gram/immich, memos originally used a *dynamically* provisioned PV
+> (`encrypted-local-path` StorageClass) whose on-disk path embeds the PVC's UID and whose reclaim
+> policy is `Delete` — not a stable target for kopia to point at. `charts/memos` now also
+> pre-creates a static `memos-pv` (`templates/persistent-volume.yaml`, mirroring `gram-pv`) bound
+> via an explicit `claimRef`, at the fixed path `/mnt/drive1/pv/memos`, `Retain` + `keep`. If
+> you're setting this up fresh, this happens automatically on first install; migrating an
+> *existing* memos PVC onto the static path requires manually copying the old dynamic PV's
+> contents into `/mnt/drive1/pv/memos` (scale memos to 0, back up the old dir, `helm upgrade` to
+> create `memos-pv`, restore into the new dir, scale back up) — kopia's file-level snapshots are
+> crash-consistent only (no app quiescing), same as immich's; SQLite's WAL mode is designed to
+> recover cleanly from this.
+
 ---
 
 ## Secrets — what's in each file and how to update
@@ -91,6 +109,8 @@ save (YubiKey to open). Then re-run the matching apply recipe. Never hand-edit `
 | `values/immich.enc.yaml` | `immich.oidc.{clientId,clientSecret}` (authentik **provider** side) | `just authentik-secret` | Must stay in sync with `immich-config.enc.yaml`. Fully encrypted. |
 | `values/immich-config.enc.yaml` | `postgres.password` + oauth `clientId`/`clientSecret` (+ plaintext immich config) | `just immich` | **Partially** encrypted (`encrypted_regex: ^(password\|clientId\|clientSecret)$`) — the rest of the config stays diffable. oauth creds must match `immich.enc.yaml`. |
 | `values/kopia-immich.enc.yaml` | Secret `kopia-immich-secrets`: `KOPIA_BUCKET`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `KOPIA_PASSWORD` | `just kopia-secret immich` | The Secret's `metadata.name` **must equal** `repo.secretName` in `values/kopia-immich.yaml`. Fully encrypted. |
+| `values/kopia-gram.enc.yaml` | Secret `kopia-gram-secrets`: same 4 keys as above | `just kopia-secret gram` | Own bucket + IAM user. Fully encrypted. |
+| `values/kopia-memos.enc.yaml` | Secret `kopia-memos-secrets`: same 4 keys as above | `just kopia-secret memos` | Own bucket + IAM user. Fully encrypted. |
 
 **When you'd update each:**
 
