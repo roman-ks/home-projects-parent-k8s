@@ -116,6 +116,92 @@ kopia-secret name:
 kopia-ui name replicas='1':
     kubectl -n kopia scale deploy/kopia-{{name}}-server --replicas={{replicas}}
 
+# Apply the Tailscale operator's OAuth client credentials (RAM-backed decrypt;
+# YubiKey). Run once / when the credential changes — see
+# values/tailscale-oauth.enc.yaml for placeholder layout.
+tailscale-secret:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    tmp=$(mktemp -d "${XDG_RUNTIME_DIR:-/dev/shm}/tailscale.XXXXXX")
+    trap 'rm -rf "$tmp"; stty sane 2>/dev/null || true' EXIT
+    kubectl create namespace tailscale --dry-run=client -o yaml | kubectl apply -f -
+    # tailscale-dns-suffix dropped — the dns-stub moved from CNAME+MagicDNS-suffix
+    # targets to direct tailnet IPs (Task 5's Android CNAME-chasing fix), so this
+    # secret no longer has a consumer. Not deleted from the cluster automatically
+    # if it's already there — orphaned, not managed by anything, harmless to leave
+    # or clean up manually.
+    files=(tailscale-oauth)
+    i=0
+    for f in "${files[@]}"; do
+        i=$((i + 1))
+        cp "values/$f.enc.yaml" "$tmp/$f.yaml"
+        echo ">>> [$i/${#files[@]}] Decrypting $f.enc.yaml — enter PIN, then tap the YubiKey when it flashes..."
+        sops -d -i "$tmp/$f.yaml"
+        kubectl apply -f "$tmp/$f.yaml"
+    done
+
+# Deploy the Tailscale operator. Requires `just tailscale-secret` to have been
+# run first (operator-oauth must exist before the operator pod can start).
+tailscale-operator:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    kubectl create namespace tailscale --dry-run=client -o yaml | kubectl apply -f -
+    helm dependency update charts/tailscale-operator-wrapper
+    # Two genuinely separate passes, not a retry of the same operation — see
+    # the long comment in templates/proxyclass.yaml for why. Pass 1 installs
+    # the operator + its ProxyClass CRD, with proxyClass.create=false so
+    # nothing in this pass references that CRD yet (Helm validates every
+    # object's REST mapping upfront, before applying anything — a CRD and an
+    # instance of it in the same release is a deadlock, not a race).
+    helm upgrade --install tailscale-operator ./charts/tailscale-operator-wrapper \
+        --namespace tailscale
+    # Pass 2: a fresh, later `helm` invocation does its own fresh API
+    # discovery rather than reusing whatever the first pass had cached
+    # in-process, so it sees the CRD pass 1 just registered. Still cleared
+    # explicitly first and retried a couple of times, in case discovery
+    # genuinely hasn't propagated yet by the time this runs.
+    for i in 1 2 3; do
+        rm -rf ~/.kube/cache/discovery
+        if helm upgrade --install tailscale-operator ./charts/tailscale-operator-wrapper \
+            --namespace tailscale --set proxyClass.create=true; then
+            break
+        fi
+        if [ "$i" -eq 3 ]; then
+            echo "helm upgrade --install (pass 2, proxyClass.create=true) failed after 3 attempts" >&2
+            exit 1
+        fi
+        echo ">>> Retrying pass 2 in 5s (ProxyClass CRD may still be registering)..."
+        sleep 5
+    done
+    echo ""
+    echo ">>> This host has no tailnet access, so none of these can be verified from here:"
+    echo ">>> the dns-stub's own tailnet IP (Split DNS nameserver for pi.home), and every"
+    echo ">>> HOST_MAP target IP (values.yaml, dnsStub.hostMap — now hardcoded tailnet IPs,"
+    echo ">>> not CNAMEs). Check via the Tailscale admin console or 'tailscale status' from a"
+    echo ">>> tailnet device, and update whatever changed (e.g. after a cluster rebuild)."
+
+# Deploy the tailnet-only Traefik instance (routes Memos + Samba). Requires
+# `just tailscale-operator` to have already succeeded — needs the tailscale
+# namespace and the operator running to pick up this chart's
+# tailscale.com/expose annotation.
+traefik-tailnet:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    kubectl create namespace tailscale --dry-run=client -o yaml | kubectl apply -f -
+    helm dependency update charts/traefik-tailnet
+    # --skip-crds: the traefik dependency ships its own CRDs (including
+    # Traefik Hub ones we don't use at all) via Helm's crds/ folder. Every one
+    # of them, including the IngressRoute/IngressRouteTCP types this chart
+    # actually needs, already exists — owned by k3s's own bundled Traefik
+    # install (field manager "k3s"), same upstream chart lineage. Without
+    # this flag, Helm's server-side apply conflicts with that existing
+    # ownership instead of just leaving it alone.
+    helm upgrade --install traefik-tailnet ./charts/traefik-tailnet \
+        --namespace tailscale --skip-crds
+    echo ""
+    echo ">>> Debug dashboard for this instance: https://ts-traefik.pi.home (via the main"
+    echo ">>> Traefik — see k3s/server/manifests/ts-traefik-dashboard-debug.yaml)."
+
 authentik:
     #!/usr/bin/env bash
     set -euo pipefail

@@ -1,0 +1,35 @@
+{{- /*
+Gated behind proxyClass.create (default false), NOT a Helm hook — a
+post-install/post-upgrade hook was tried first, but even that phase ran
+before the ProxyClass CRD (a normal template in the tailscale-operator
+subchart, applied in the same install) had registered. Turns out this is a
+known, unresolved upstream limitation, not something fixable with a hook or
+a retry of the same operation — see
+https://github.com/tailscale/tailscale/issues/15437 (Tailscale's own team:
+"problematic that you can specify a default proxy class in the Helm values
+which can't meaningfully exist before the helm release is deployed").
+
+The real fix: this instance must not be part of the SAME helm install that
+also creates its own CRD — Helm validates every object's REST mapping
+upfront, before applying anything, so a CRD and an instance of that CRD in
+one release is a genuine chicken-and-egg deadlock, not a timing race. The
+`tailscale-operator` justfile recipe applies this chart twice — once with
+proxyClass.create=false (installs the CRD, nothing references it yet), then
+again with proxyClass.create=true (a separate, later `helm upgrade`
+invocation, which does its own fresh API discovery and finds the now-
+registered CRD from the first pass).
+*/ -}}
+{{- if .Values.proxyClass.create }}
+apiVersion: tailscale.com/v1alpha1
+kind: ProxyClass
+metadata:
+  name: default
+spec:
+  statefulSet:
+    pod:
+      tailscaleContainer:
+        resources:
+          requests:
+            cpu: {{ .Values.proxyClass.resources.requests.cpu | quote }}
+            memory: {{ .Values.proxyClass.resources.requests.memory | quote }}
+{{- end }}

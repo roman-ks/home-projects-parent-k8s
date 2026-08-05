@@ -1,0 +1,36 @@
+{{- /*
+Plain Ingress, ingressClassName: traefik (the MAIN k3s Traefik, not this
+chart's own instance) — fronts this instance's dashboard for local LAN
+debugging. Lives in the same namespace as its backend (traefik-tailnet's
+own Service) since plain Ingress can't reference a cross-namespace backend
+at all — see dashboard-debug-cert.yaml for why this isn't an IngressRoute
+in kube-system anymore.
+*/ -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ts-traefik-dashboard-debug
+  annotations:
+    # Same SSO gate as the main dashboard's own route (k3s/server/manifests/
+    # traefik-config.yaml) — this shows another Traefik instance's live
+    # routing config, comparable sensitivity. Annotation-based middleware
+    # reference (not IngressRoute's spec.routes[].middlewares field) — same
+    # mechanism charts/kopia uses for the identical cross-namespace reference.
+    traefik.ingress.kubernetes.io/router.middlewares: kube-system-authentik-forward-auth@kubernetescrd
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - ts-traefik.pi.home
+      secretName: ts-traefik-tls
+  rules:
+    - host: ts-traefik.pi.home
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: traefik-tailnet
+                port:
+                  number: 8080

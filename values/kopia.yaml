@@ -1,0 +1,16 @@
+# Non-secret kopia config (S3 creds + repo password live in values/kopia.enc.yaml).
+repo:
+  region: us-east-1
+  # Match the existing repo's identity for history continuity (compose used these).
+  hostname: pi-kopia
+  username: nobody
+
+source:
+  path: /data
+  hostPath: /mnt/drive1/pv/immich-external
+
+schedule: "0 3 * * *"
+
+server:
+  enabled: true
+  host: kopia.pi.home
