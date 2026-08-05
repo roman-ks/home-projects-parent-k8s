@@ -36,6 +36,8 @@ entries:
       issuer_mode: global
       client_id: !Env OAUTH_IMMICH_CLIENT_ID
       client_secret: !Env OAUTH_IMMICH_CLIENT_SECRET
+      grant_types:
+        - authorization_code
       redirect_uris:
         - matching_mode: strict
           url: app.immich:///oauth-callback

@@ -1,0 +1,105 @@
+# ---------------------------------------------------------------------------
+# Hand-rolled postgres (immich's special image) + storage for THIS wrapper.
+# ---------------------------------------------------------------------------
+# Node that owns the local storage (kubernetes.io/hostname) — required by the
+# `local` PV nodeAffinity. Dirs must pre-exist (`just bootstrap pv-dir`).
+nodeName: raspberrypi
+
+postgres:
+  image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0
+  user: immich
+  database: immich
+  # password is supplied at deploy from values/immich-config.enc.yaml (-> immich-db secret)
+  secretName: immich-db
+  storage:
+    path: /mnt/drive1/pv/immich-postgres
+    size: 20Gi
+
+storage:
+  # Immich's own upload/library dir (mounted at /data). Writer.
+  upload:
+    path: /mnt/drive1/pv/immich-upload
+    size: 500Gi
+  # External library — SAME path as the samba `imuser` share. Immich only READS
+  # it, so it's mounted read-only (samba is the sole writer).
+  external:
+    path: /mnt/drive1/pv/immich-external
+    size: 500Gi
+
+host: immich.pi.home
+
+# ---------------------------------------------------------------------------
+# Values passed to the community `immich` subchart (bjw-s common based).
+# ---------------------------------------------------------------------------
+immich:
+  machine-learning:
+    enabled: false
+
+  valkey:
+    enabled: true
+
+  controllers:
+    main:
+      containers:
+        main:
+          image:
+            repository: ghcr.io/immich-app/immich-server
+            tag: v3.1.0
+          env:
+            DB_HOSTNAME: immich-postgres
+            DB_USERNAME: immich
+            DB_DATABASE_NAME: immich
+            IMMICH_MACHINE_LEARNING_URL: http://ml.immich.pi.home:3003
+            DB_PASSWORD:
+              valueFrom:
+                secretKeyRef:
+                  name: immich-db
+                  key: password
+            REDIS_HOSTNAME: immich-valkey
+            # Trust the internal CA (from immich's own cert's ca.crt) to reach
+            # authentik on the OIDC backchannel.
+            NODE_EXTRA_CA_CERTS: /certs/ca.crt
+
+  immich:
+    # Render the configuration into a SECRET (not a ConfigMap) since it carries
+    # the OIDC client secret. The `configuration:` body itself is supplied at
+    # deploy from the sops-encrypted values/immich-config.enc.yaml.
+    configurationKind: Secret
+    # Shared library claim (mounted at /data on the server).
+    persistence:
+      library:
+        existingClaim: immich-upload
+
+  server:
+    # Server-only mounts (common-based persistence).
+    persistence:
+      external:
+        enabled: true
+        type: persistentVolumeClaim
+        existingClaim: immich-external
+        globalMounts:
+          - path: /mnt/external_lib
+            readOnly: true
+      certs:
+        enabled: true
+        type: secret
+        name: immich-tls
+        globalMounts:
+          - path: /certs
+    ingress:
+      main:
+        enabled: true
+        annotations:
+          cert-manager.io/cluster-issuer: internal-ca
+        hosts:
+          - host: immich.pi.home
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: main
+                  port: 2283
+        tls:
+          - secretName: immich-tls
+            hosts:
+              - immich.pi.home

@@ -1,0 +1,12 @@
+apiVersion: v2
+name: immich-wrapper
+description: >-
+  Immich photo server. Wraps the community immich chart (server + valkey, ML
+  disabled) and adds immich's special postgres (pgvecto/vectorchord), retained
+  hostPath storage, OIDC via authentik, and a traefik ingress.
+type: application
+version: 0.1.0
+dependencies:
+  - name: immich
+    version: 0.13.1
+    repository: oci://ghcr.io/immich-app/immich-charts

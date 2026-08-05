@@ -1,0 +1,37 @@
+image:
+  repository: ghcr.io/servercontainers/samba
+  tag: smbd-only-latest
+  pullPolicy: IfNotPresent
+
+# LoadBalancer exposes SMB on the LAN via k3s servicelb (reachable at <node-ip>:445).
+service:
+  type: LoadBalancer
+  port: 445
+  # loadBalancerIP: ""   # optional: pin a LAN IP
+
+# SMB accounts. Passwords come from the `samba-accounts` secret
+# (values/samba.enc.yaml, applied by `just samba-secret`). UIDs are non-secret.
+accounts:
+  secretName: samba-accounts
+  user:
+    uid: 3001
+    passwordKey: user-password
+  imuser:
+    uid: 3002
+    passwordKey: imuser-password
+
+# Node that owns the local storage — matched via kubernetes.io/hostname in the
+# PV nodeAffinity (required for `local` volumes).
+nodeName: raspberrypi
+
+# `local`-volume storage on the encrypted drive. Retained on uninstall. The dirs
+# must pre-exist (`just bootstrap pv-dir`) — local volumes don't auto-create.
+# `imuser` is Immich's external library — the immich release mounts the SAME path
+# (a second PV/PVC in the immich namespace, read-only), so keep these aligned.
+persistence:
+  user:
+    path: /mnt/drive1/pv/samba-user
+    size: 100Gi
+  imuser:
+    path: /mnt/drive1/pv/immich-external
+    size: 500Gi

@@ -1,0 +1,56 @@
+{{- $vols := dict
+  "immich-upload"   .Values.storage.upload
+  "immich-external" .Values.storage.external
+  "immich-postgres" .Values.postgres.storage -}}
+{{- range $name, $cfg := $vols }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ $name }}
+  labels:
+    app: immich
+  annotations:
+    # Never delete the data (or the PV object) on `helm uninstall`.
+    helm.sh/resource-policy: keep
+spec:
+  capacity:
+    storage: {{ $cfg.size }}
+  # RWO for local-volume support; immich mounts `external` read-only (samba is
+  # the sole writer of that shared path).
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  local:
+    path: {{ $cfg.path }}
+  # Required for local volumes — pins consumers to the node holding the data.
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - {{ $.Values.nodeName }}
+  claimRef:
+    namespace: {{ $.Release.Namespace }}
+    name: {{ $name }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ $name }}
+  labels:
+    app: immich
+  annotations:
+    helm.sh/resource-policy: keep
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ""
+  volumeName: {{ $name }}
+  resources:
+    requests:
+      storage: {{ $cfg.size }}
+{{- end }}

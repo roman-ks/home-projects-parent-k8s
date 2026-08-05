@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "kopia.fullname" . }}-env
+  labels:
+    {{- include "kopia.labels" . | nindent 4 }}
+data:
+  # KOPIA_BUCKET is NOT here — it comes from the sops secret (envFrom), so the
+  # bucket name (which embeds the AWS account id) isn't stored in plaintext.
+  KOPIA_REGION: {{ .Values.repo.region | quote }}
+  KOPIA_ENDPOINT: {{ .Values.repo.endpoint | quote }}
+  KOPIA_HOSTNAME: {{ .Values.repo.hostname | quote }}
+  KOPIA_USERNAME: {{ .Values.repo.username | quote }}
+  KOPIA_SOURCE_PATH: {{ .Values.source.path | quote }}
+  KOPIA_COMPRESSION: {{ .Values.compression | quote }}
+  KEEP_LATEST: {{ .Values.retention.keepLatest | quote }}
+  KEEP_DAILY: {{ .Values.retention.keepDaily | quote }}
+  KEEP_WEEKLY: {{ .Values.retention.keepWeekly | quote }}
+  KEEP_MONTHLY: {{ .Values.retention.keepMonthly | quote }}
+  KEEP_ANNUAL: {{ .Values.retention.keepAnnual | quote }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "kopia.fullname" . }}-scripts
+  labels:
+    {{- include "kopia.labels" . | nindent 4 }}
+data:
+  connect.sh: |
+    #!/bin/sh
+    # Idempotent bootstrap: connect to the existing S3 repo, or create it if the
+    # bucket has none. S3 creds come from AWS_* env; repo password from
+    # KOPIA_PASSWORD env. `create` refuses if a repo already exists, so the ||
+    # only creates a genuinely-empty bucket.
+    set -eu
+    echo "Connecting to repository (bucket=$KOPIA_BUCKET host=$KOPIA_HOSTNAME user=$KOPIA_USERNAME)..."
+    if kopia repository connect s3 \
+         --bucket="$KOPIA_BUCKET" --region="$KOPIA_REGION" --endpoint="$KOPIA_ENDPOINT" \
+         --override-hostname="$KOPIA_HOSTNAME" --override-username="$KOPIA_USERNAME" \
+         --no-check-for-updates; then
+      echo "Connected to existing repository."
+    else
+      echo "No repository in bucket — creating a new one."
+      kopia repository create s3 \
+        --bucket="$KOPIA_BUCKET" --region="$KOPIA_REGION" --endpoint="$KOPIA_ENDPOINT" \
+        --override-hostname="$KOPIA_HOSTNAME" --override-username="$KOPIA_USERNAME" \
+        --no-check-for-updates
+    fi
+    echo "Applying retention/compression policy for $KOPIA_SOURCE_PATH..."
+    kopia policy set "$KOPIA_SOURCE_PATH" \
+      --keep-latest="$KEEP_LATEST" \
+      --keep-daily="$KEEP_DAILY" \
+      --keep-weekly="$KEEP_WEEKLY" \
+      --keep-monthly="$KEEP_MONTHLY" \
+      --keep-annual="$KEEP_ANNUAL" \
+      --compression="$KOPIA_COMPRESSION"

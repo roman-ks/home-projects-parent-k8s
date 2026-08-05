@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: samba
+  labels:
+    app: samba
+spec:
+  replicas: 1
+  # RWO hostPath volumes — single writer.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: samba
+  template:
+    metadata:
+      labels:
+        app: samba
+    spec:
+      # The local-volume dirs are root:root, so the SMB users (UID
+      # {{ .Values.accounts.user.uid }}/{{ .Values.accounts.imuser.uid }}) can't write.
+      # chown -R each share so file creation works everywhere, including files
+      # copied in out-of-band (owned by another UID). Traverses the whole share on
+      # start (metadata only); a no-op once ownership is consistent.
+      initContainers:
+        - name: fix-perms
+          image: busybox
+          command:
+            - sh
+            - -c
+            - |
+              chown -R {{ .Values.accounts.user.uid }}:{{ .Values.accounts.user.uid }} /shares/user
+              chown -R {{ .Values.accounts.imuser.uid }}:{{ .Values.accounts.imuser.uid }} /shares/imuser
+          volumeMounts:
+            - name: user
+              mountPath: /shares/user
+            - name: imuser
+              mountPath: /shares/imuser
+      containers:
+        - name: samba
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: smb
+              containerPort: 445
+          env:
+            - name: FAIL_FAST
+              value: "1"
+            # --- user account (password = ACCOUNT_user value) ---
+            - name: ACCOUNT_user
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.accounts.secretName }}
+                  key: {{ .Values.accounts.user.passwordKey }}
+            - name: UID_user
+              value: "{{ .Values.accounts.user.uid }}"
+            - name: SAMBA_VOLUME_CONFIG_useronly
+              value: |
+                [User Share]
+                  path = /shares/user
+                  valid users = user
+                  guest ok = no
+                  read only = no
+                  browseable = yes
+            # --- imuser account (Immich external library) ---
+            - name: ACCOUNT_imuser
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.accounts.secretName }}
+                  key: {{ .Values.accounts.imuser.passwordKey }}
+            - name: UID_imuser
+              value: "{{ .Values.accounts.imuser.uid }}"
+            - name: SAMBA_VOLUME_CONFIG_imuseronly
+              value: |
+                [Imuser Share]
+                  path = /shares/imuser
+                  valid users = imuser
+                  guest ok = no
+                  read only = no
+                  browseable = yes
+                  # This share is Immich's external library. Force new files/dirs
+                  # to be other-readable so Immich (a different UID, read-only) can
+                  # index them without any shared-group/fsGroup setup.
+                  create mask = 0644
+                  force create mode = 0644
+                  directory mask = 0755
+                  force directory mode = 0755
+          volumeMounts:
+            - name: user
+              mountPath: /shares/user
+            - name: imuser
+              mountPath: /shares/imuser
+      volumes:
+        - name: user
+          persistentVolumeClaim:
+            claimName: samba-user
+        - name: imuser
+          persistentVolumeClaim:
+            claimName: samba-imuser

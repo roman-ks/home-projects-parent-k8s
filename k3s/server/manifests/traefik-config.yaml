@@ -4,15 +4,25 @@ metadata:
   name: traefik
   namespace: kube-system
 spec:
-  valuesContent: |- 
-    api: 
+  valuesContent: |-
+    api:
       dashboard: true
+    # Allow Ingress/IngressRoutes in any namespace to reference the shared
+    # authentik-forward-auth Middleware in kube-system (off by default). Needed
+    # for apps outside kube-system (kopia, etc.) to use SSO.
+    providers:
+      kubernetesCRD:
+        allowCrossNamespace: true
     ingressRoute:
       dashboard:
         enabled: true
-        entryPoints: 
+        entryPoints:
           - websecure
         matchRule: Host(`traefik.pi.home`)
+        # Gate the dashboard behind authentik SSO (see authentik-forward-auth.yaml).
+        middlewares:
+          - name: authentik-forward-auth
+            namespace: kube-system
         tls:
           secretName: traefik-tls
           hosts:

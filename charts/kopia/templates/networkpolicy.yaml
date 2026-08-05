@@ -1,0 +1,30 @@
+{{- if .Values.server.enabled }}
+# The kopia server runs unauthenticated (--without-password), so ingress to its
+# API is restricted to Traefik only — i.e. the authentik-gated ingress path.
+# Once this policy selects the pod, all other ingress is denied. Egress is left
+# open, so the server still reaches S3. (Scoped to this release's server pod.)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "kopia.fullname" . }}-server
+  labels:
+    {{- include "kopia.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "kopia.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: server
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.server.allowFrom.namespace }}
+          podSelector:
+            matchLabels:
+              {{- toYaml .Values.server.allowFrom.podLabels | nindent 14 }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.server.port }}
+{{- end }}

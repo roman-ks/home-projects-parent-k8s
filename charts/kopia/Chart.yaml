@@ -1,0 +1,10 @@
+apiVersion: v2
+name: kopia
+description: >-
+  Kopia backup of a folder to an S3 bucket, fully bootstrapped: a Job/CronJob
+  connects-or-creates the repository from secrets (no UI setup), sets the
+  retention policy, and snapshots on a k8s schedule. An optional UI server runs
+  behind the authentik forwardAuth middleware. One release = one repo/bucket.
+type: application
+version: 0.1.0
+appVersion: "0.23.1"
