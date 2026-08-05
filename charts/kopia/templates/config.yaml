@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: kopia-env
+  name: {{ include "kopia.fullname" . }}-env
   labels:
-    app: kopia
+    {{- include "kopia.labels" . | nindent 4 }}
 data:
   # KOPIA_BUCKET is NOT here — it comes from the sops secret (envFrom), so the
   # bucket name (which embeds the AWS account id) isn't stored in plaintext.
@@ -22,9 +22,9 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: kopia-scripts
+  name: {{ include "kopia.fullname" . }}-scripts
   labels:
-    app: kopia
+    {{- include "kopia.labels" . | nindent 4 }}
 data:
   connect.sh: |
     #!/bin/sh

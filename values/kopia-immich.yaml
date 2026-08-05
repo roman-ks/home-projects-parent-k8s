@@ -1,9 +1,11 @@
-# Non-secret kopia config (S3 creds + repo password live in values/kopia.enc.yaml).
+# Non-secret kopia config for the `immich` target — release kopia-immich.
+# Secrets (bucket, S3 creds, repo password) live in values/kopia-immich.enc.yaml.
 repo:
   region: us-east-1
   # Match the existing repo's identity for history continuity (compose used these).
   hostname: pi-kopia
   username: nobody
+  secretName: kopia-immich-secrets
 
 source:
   path: /data
@@ -13,4 +15,4 @@ schedule: "0 3 * * *"
 
 server:
   enabled: true
-  host: kopia.pi.home
+  host: kopia-immich.pi.home

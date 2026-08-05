@@ -2,23 +2,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: kopia-server
+  name: {{ include "kopia.fullname" . }}-server
   labels:
-    app: kopia
-    component: server
+    {{- include "kopia.labels" . | nindent 4 }}
+    app.kubernetes.io/component: server
 spec:
-  replicas: 1
+  # Default 0 — the UI does periodic S3 polling (billed), so keep it scaled to
+  # zero and scale up on demand (`just kopia-ui <target>`). Backups run via the
+  # CronJob regardless.
+  replicas: {{ .Values.server.replicas }}
   strategy:
     type: Recreate
   selector:
     matchLabels:
-      app: kopia
-      component: server
+      {{- include "kopia.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: server
   template:
     metadata:
       labels:
-        app: kopia
-        component: server
+        {{- include "kopia.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: server
     spec:
       initContainers:
         # connect-or-create + policy; writes repository.config to the shared
@@ -28,7 +31,7 @@ spec:
           command: ["/bin/sh", "/scripts/connect.sh"]
           envFrom:
             - configMapRef:
-                name: kopia-env
+                name: {{ include "kopia.fullname" . }}-env
             - secretRef:
                 name: {{ .Values.repo.secretName }}
           volumeMounts:
@@ -51,7 +54,7 @@ spec:
             - --allow-extremely-dangerous-unauthenticated-server-on-the-network
           envFrom:
             - configMapRef:
-                name: kopia-env
+                name: {{ include "kopia.fullname" . }}-env
             - secretRef:
                 name: {{ .Values.repo.secretName }}
           ports:
@@ -65,26 +68,26 @@ spec:
               mountPath: {{ .Values.source.path }}
               readOnly: true
       volumes:
-        - { name: scripts, configMap: { name: kopia-scripts } }
+        - { name: scripts, configMap: { name: {{ include "kopia.fullname" . }}-scripts } }
         - { name: config, emptyDir: {} }
         - { name: cache, emptyDir: {} }
         - { name: logs, emptyDir: {} }
         - name: source
           persistentVolumeClaim:
-            claimName: kopia-source
+            claimName: {{ include "kopia.fullname" . }}-source
             readOnly: true
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: kopia-server
+  name: {{ include "kopia.fullname" . }}-server
   labels:
-    app: kopia
-    component: server
+    {{- include "kopia.labels" . | nindent 4 }}
+    app.kubernetes.io/component: server
 spec:
   selector:
-    app: kopia
-    component: server
+    {{- include "kopia.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: server
   ports:
     - name: http
       port: {{ .Values.server.port }}
@@ -93,9 +96,9 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: kopia
+  name: {{ include "kopia.fullname" . }}
   labels:
-    app: kopia
+    {{- include "kopia.labels" . | nindent 4 }}
   annotations:
     cert-manager.io/cluster-issuer: {{ .Values.server.clusterIssuer }}
     # authentik SSO via the shared forwardAuth middleware.
@@ -105,7 +108,7 @@ spec:
   tls:
     - hosts:
         - {{ .Values.server.host | quote }}
-      secretName: {{ .Values.server.tlsSecretName }}
+      secretName: {{ include "kopia.fullname" . }}-tls
   rules:
     - host: {{ .Values.server.host | quote }}
       http:
@@ -114,7 +117,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: kopia-server
+                name: {{ include "kopia.fullname" . }}-server
                 port:
                   number: {{ .Values.server.port }}
 {{- end }}

@@ -11,8 +11,8 @@ repo:
   # same lineage only if hostname+username+path all match.
   hostname: pi-kopia
   username: nobody
-  # Secret (values/kopia.enc.yaml, `just kopia-secret`) holding:
-  #   KOPIA_BUCKET, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, KOPIA_PASSWORD
+  # Per-target secret (values/kopia-<target>.enc.yaml, `just kopia-secret <target>`)
+  # holding: KOPIA_BUCKET, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, KOPIA_PASSWORD
   # (the bucket lives here too so its name / AWS account id isn't in plaintext).
   secretName: kopia-secrets
 
@@ -37,14 +37,16 @@ retention:
 compression: zstd
 
 # UI server (browse/restore) behind authentik SSO. Snapshots are driven by the
-# CronJob, so the server does no scheduling.
+# CronJob, so the server does no scheduling. TLS secret is <release>-tls.
 server:
   enabled: true
-  host: kopia.pi.home
+  # Scaled to zero by default — a running server periodically polls S3 (billed).
+  # Scale up on demand: `just kopia-ui <target>` (and `... 0` to stop).
+  replicas: 0
+  host: kopia.pi.home   # per-target, e.g. kopia-immich.pi.home
   port: 51515
   ingressClassName: traefik
   clusterIssuer: internal-ca
-  tlsSecretName: kopia-tls
   # Traefik forwardAuth middleware (k3s/server/manifests/authentik-forward-auth.yaml).
   authMiddleware: kube-system-authentik-forward-auth@kubernetescrd
   # NetworkPolicy: the server is unauthenticated, so restrict who may reach its
