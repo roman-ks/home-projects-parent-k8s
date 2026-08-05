@@ -6,6 +6,8 @@ metadata:
 spec:
   valuesContent: |-
     api:
+  valuesContent: |-
+    api:
       dashboard: true
     # allowCrossNamespace stays true — but note it's not actually what lets
     # apps outside kube-system (kopia, etc.) use the shared authentik SSO
@@ -27,8 +29,13 @@ spec:
       dashboard:
         enabled: true
         entryPoints:
+        entryPoints:
           - websecure
         matchRule: Host(`traefik.pi.home`)
+        # Gate the dashboard behind authentik SSO (see authentik-forward-auth.yaml).
+        middlewares:
+          - name: authentik-forward-auth
+            namespace: kube-system
         # Gate the dashboard behind authentik SSO (see authentik-forward-auth.yaml).
         middlewares:
           - name: authentik-forward-auth

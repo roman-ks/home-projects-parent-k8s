@@ -1,9 +1,9 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: kopia-backup
+  name: {{ include "kopia.fullname" . }}-backup
   labels:
-    app: kopia
+    {{- include "kopia.labels" . | nindent 4 }}
 spec:
   schedule: {{ .Values.schedule | quote }}
   concurrencyPolicy: Forbid
@@ -15,8 +15,8 @@ spec:
       template:
         metadata:
           labels:
-            app: kopia
-            component: backup
+            {{- include "kopia.selectorLabels" . | nindent 12 }}
+            app.kubernetes.io/component: backup
         spec:
           restartPolicy: Never
           containers:
@@ -28,11 +28,13 @@ spec:
               args:
                 - |
                   sh /scripts/connect.sh
-                  echo "Creating snapshot of $KOPIA_SOURCE_PATH..."
-                  kopia snapshot create "$KOPIA_SOURCE_PATH"
+                  echo ">>> snapshot result (json):"
+                  # --json emits the snapshot manifest + stats (file count, size,
+                  # errors, duration) to the Job log; exit code drives Job status.
+                  kopia snapshot create "$KOPIA_SOURCE_PATH" --json
               envFrom:
                 - configMapRef:
-                    name: kopia-env
+                    name: {{ include "kopia.fullname" . }}-env
                 - secretRef:
                     name: {{ .Values.repo.secretName }}
               volumeMounts:
@@ -50,7 +52,7 @@ spec:
           volumes:
             - name: scripts
               configMap:
-                name: kopia-scripts
+                name: {{ include "kopia.fullname" . }}-scripts
             - name: config
               emptyDir: {}
             - name: cache
@@ -59,5 +61,5 @@ spec:
               emptyDir: {}
             - name: source
               persistentVolumeClaim:
-                claimName: kopia-source
+                claimName: {{ include "kopia.fullname" . }}-source
                 readOnly: true

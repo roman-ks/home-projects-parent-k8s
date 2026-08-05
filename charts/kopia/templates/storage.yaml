@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: kopia-source
+  name: {{ include "kopia.fullname" . }}-source
   labels:
-    app: kopia
+    {{- include "kopia.labels" . | nindent 4 }}
   annotations:
     # Shared data (immich/samba) — never touch it on uninstall.
     helm.sh/resource-policy: keep
@@ -26,21 +26,21 @@ spec:
                 - {{ .Values.nodeName }}
   claimRef:
     namespace: {{ .Release.Namespace }}
-    name: kopia-source
+    name: {{ include "kopia.fullname" . }}-source
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: kopia-source
+  name: {{ include "kopia.fullname" . }}-source
   labels:
-    app: kopia
+    {{- include "kopia.labels" . | nindent 4 }}
   annotations:
     helm.sh/resource-policy: keep
 spec:
   accessModes:
     - ReadWriteOnce
   storageClassName: ""
-  volumeName: kopia-source
+  volumeName: {{ include "kopia.fullname" . }}-source
   resources:
     requests:
       storage: {{ .Values.source.size }}

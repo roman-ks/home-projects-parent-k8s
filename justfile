@@ -84,27 +84,37 @@ immich:
         --namespace immich \
         -f "$tmp/immich-config.yaml"
 
-kopia:
+# Deploy a kopia backup target (one release per bucket/repo):
+#   just kopia immich   -> release kopia-immich, values/kopia-immich.yaml
+kopia name:
     #!/usr/bin/env bash
     set -euo pipefail
     kubectl create namespace kopia --dry-run=client -o yaml | kubectl apply -f -
-    helm upgrade --install kopia ./charts/kopia \
+    helm upgrade --install kopia-{{name}} ./charts/kopia \
         --namespace kopia \
-        -f values/kopia.yaml
+        -f values/kopia-{{name}}.yaml
 
-# Apply the kopia S3 creds + repo password from the sops-encrypted manifest
+# Apply a target's S3 creds + repo password from values/kopia-<name>.enc.yaml
 # (RAM-backed decrypt; YubiKey). For an EXISTING repo, KOPIA_PASSWORD must be the
 # original repo password. Run once / when a credential changes.
-kopia-secret:
+#   just kopia-secret immich
+kopia-secret name:
     #!/usr/bin/env bash
     set -euo pipefail
     tmp=$(mktemp -d "${XDG_RUNTIME_DIR:-/dev/shm}/kopia.XXXXXX")
     trap 'rm -rf "$tmp"; stty sane 2>/dev/null || true' EXIT
     kubectl create namespace kopia --dry-run=client -o yaml | kubectl apply -f -
-    cp values/kopia.enc.yaml "$tmp/kopia.yaml"
-    echo ">>> Decrypting kopia-secrets — enter PIN, then tap the YubiKey when it flashes..."
+    cp "values/kopia-{{name}}.enc.yaml" "$tmp/kopia.yaml"
+    echo ">>> Decrypting kopia-{{name}} secret — enter PIN, then tap the YubiKey when it flashes..."
     sops -d -i "$tmp/kopia.yaml"
     kubectl apply -f "$tmp/kopia.yaml"
+
+# Scale a target's UI server up (default 1) or down (0). Scale down when done —
+# a running server polls S3 (billed).
+#   just kopia-ui immich      # up
+#   just kopia-ui immich 0    # down
+kopia-ui name replicas='1':
+    kubectl -n kopia scale deploy/kopia-{{name}}-server --replicas={{replicas}}
 
 # Apply the Tailscale operator's OAuth client credentials (RAM-backed decrypt;
 # YubiKey). Run once / when the credential changes — see
