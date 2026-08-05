@@ -2,6 +2,16 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: pihole
+  annotations:
+    {{- if .Values.pihole.clusterIssuer }}
+    # cert-manager mints + auto-renews the cert in .spec.tls[].secretName.
+    cert-manager.io/cluster-issuer: {{ .Values.pihole.clusterIssuer }}
+    {{- end }}
+    # authentik SSO via the shared forwardAuth middleware, same as the kopia
+    # chart. (CSP upgrade-insecure-requests is applied cluster-wide via the
+    # :websecure entrypoint default — see k3s/server/manifests/traefik-config.yaml
+    # — so it doesn't need to be listed here too.)
+    traefik.ingress.kubernetes.io/router.middlewares: {{ .Values.pihole.authMiddleware }}
 
 spec:
   ingressClassName: traefik

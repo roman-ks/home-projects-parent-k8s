@@ -6,8 +6,6 @@ metadata:
 spec:
   valuesContent: |-
     api:
-  valuesContent: |-
-    api:
       dashboard: true
     # allowCrossNamespace stays true — but note it's not actually what lets
     # apps outside kube-system (kopia, etc.) use the shared authentik SSO
@@ -25,17 +23,53 @@ spec:
         namespaces:
           - kube-system
         allowCrossNamespace: true
+      # Without this, an Ingress is matched by controller (traefik.io/ingress-
+      # controller), not by IngressClass name — and charts/traefik-tailnet's
+      # own IngressClass object resolves to that same controller string, so
+      # this instance was picking up traefik-tailnet-classed Ingresses too
+      # (duplicate routes in the dashboard for the same host). Mirrors
+      # charts/traefik-tailnet/values.yaml's own ingressClass: traefik-tailnet,
+      # just the other instance.
+      kubernetesIngress:
+        ingressClass: traefik
+    ports:
+      # Static, entrypoint-level redirect for the initial top-level request
+      # hitting :web, same as charts/traefik-tailnet/values.yaml's web
+      # entrypoint. Port stays exposed (unlike that instance's expose.default:
+      # false) — LAN clients hitting plain :80 get redirected rather than
+      # served insecurely.
+      web:
+        http:
+          redirections:
+            entryPoint:
+              to: websecure
+              scheme: https
+              permanent: true
+      # Entrypoint-level default middleware — applies to every router on
+      # :websecure automatically, so per-app Ingresses don't need the
+      # router.middlewares annotation just for this. (Same upgrade-insecure
+      # Middleware referenced by charts/memos et al before this moved here;
+      # see also charts/traefik-tailnet/values.yaml for the tailnet instance's
+      # equivalent.)
+      #
+      # asDefault: true — once any entrypoint sets this, a router with no
+      # explicit entryPoints annotation attaches ONLY to entrypoints marked
+      # asDefault (previously: none were marked, so every plain Ingress
+      # implicitly attached to ALL of them — web, metrics, traefik, this one
+      # — cluttering the dashboard with duplicate rules per host). web
+      # doesn't need its own router match for this anyway now that its
+      # redirect above is entrypoint-level, not per-router.
+      websecure:
+        asDefault: true
+        http:
+          middlewares:
+            - kube-system-upgrade-insecure@kubernetescrd
     ingressRoute:
       dashboard:
         enabled: true
         entryPoints:
-        entryPoints:
           - websecure
         matchRule: Host(`traefik.pi.home`)
-        # Gate the dashboard behind authentik SSO (see authentik-forward-auth.yaml).
-        middlewares:
-          - name: authentik-forward-auth
-            namespace: kube-system
         # Gate the dashboard behind authentik SSO (see authentik-forward-auth.yaml).
         middlewares:
           - name: authentik-forward-auth

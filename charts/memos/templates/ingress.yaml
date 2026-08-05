@@ -9,9 +9,6 @@ metadata:
     # cert-manager mints + auto-renews the cert in .spec.tls[].secretName.
     cert-manager.io/cluster-issuer: {{ .Values.ingress.clusterIssuer }}
     {{- end }}
-    # CSP upgrade-insecure-requests — matches the old docker-compose Traefik
-    # setup. See k3s/server/manifests/upgrade-insecure.yaml.
-    traefik.ingress.kubernetes.io/router.middlewares: kube-system-upgrade-insecure@kubernetescrd
 spec:
   ingressClassName: {{ .Values.ingress.className }}
   tls:

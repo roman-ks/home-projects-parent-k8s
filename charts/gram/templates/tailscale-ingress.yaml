@@ -1,0 +1,35 @@
+{{- /*
+Second Ingress, ingressClassName: traefik-tailnet, alongside the LAN one
+above, both pointing at the same backend Service. Same pattern as the memos
+chart (see charts/memos/templates/tailscale-ingress.yaml for the full
+rationale) — reuses the LAN Ingress's gram-tls secret rather than minting a
+second cert.
+*/ -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gram-tailnet
+  annotations:
+    # Without this, Traefik binds the router to every entrypoint it has, not
+    # just the one that makes sense for an HTTPS Ingress. (CSP
+    # upgrade-insecure-requests is applied automatically on :websecure via
+    # this instance's entrypoint default — see charts/traefik-tailnet/values.yaml
+    # — so no router.middlewares annotation is needed for it here.)
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+spec:
+  ingressClassName: traefik-tailnet
+  tls:
+    - hosts:
+        - {{ .Values.gram.cname | quote }}
+      secretName: {{ .Values.gram.tlsSecretName }}
+  rules:
+    - host: {{ .Values.gram.cname | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: gram
+                port:
+                  number: 8000

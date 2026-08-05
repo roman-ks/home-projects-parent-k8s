@@ -6,3 +6,7 @@ pihole:
   services: []
   tlsSecretName: "pihole-tls"
   hosts: []
+  # cert-manager issues + auto-renews the tlsSecretName above from this ClusterIssuer.
+  clusterIssuer: internal-ca
+  # authentik SSO via the shared forwardAuth middleware (see charts/kopia).
+  authMiddleware: kube-system-authentik-forward-auth@kubernetescrd

@@ -5,3 +5,5 @@ gram:
     tag: "latest"
   tlsSecretName: "gram-tls"
   pvHostPath: "/mnt/pv/gram"
+  # cert-manager issues + auto-renews the tlsSecretName above from this ClusterIssuer.
+  clusterIssuer: internal-ca

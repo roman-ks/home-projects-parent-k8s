@@ -1,4 +1,6 @@
-oci_registry: 
+oci_registry:
   cname: ""
   tlsSecretName: oci-registry-tls
   pvHostPath: "/mnt/pv/oci-registry"
+  # cert-manager issues + auto-renews the tlsSecretName above from this ClusterIssuer.
+  clusterIssuer: internal-ca

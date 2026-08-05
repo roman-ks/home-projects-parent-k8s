@@ -2,6 +2,11 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: oci-registry
+  annotations:
+    {{- if .Values.oci_registry.clusterIssuer }}
+    # cert-manager mints + auto-renews the cert in .spec.tls[].secretName.
+    cert-manager.io/cluster-issuer: {{ .Values.oci_registry.clusterIssuer }}
+    {{- end }}
 
 spec:
   ingressClassName: traefik

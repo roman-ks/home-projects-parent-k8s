@@ -2,6 +2,11 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: gram
+  annotations:
+    {{- if .Values.gram.clusterIssuer }}
+    # cert-manager mints + auto-renews the cert in .spec.tls[].secretName.
+    cert-manager.io/cluster-issuer: {{ .Values.gram.clusterIssuer }}
+    {{- end }}
 
 spec:
   ingressClassName: traefik

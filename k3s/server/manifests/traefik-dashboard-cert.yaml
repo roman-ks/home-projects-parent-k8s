@@ -1,0 +1,18 @@
+# cert-manager's ingress-shim only watches plain Ingress objects, not the
+# IngressRoute CRD the dashboard route in traefik-config.yaml uses — so unlike
+# the per-chart Ingresses (cluster-issuer annotation), this one needs its own
+# Certificate resource. Same pattern as
+# charts/traefik-tailnet/templates/dashboard-debug-cert.yaml, the tailnet
+# instance's equivalent.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: traefik-tls
+  namespace: kube-system
+spec:
+  secretName: traefik-tls
+  dnsNames:
+    - traefik.pi.home
+  issuerRef:
+    name: internal-ca
+    kind: ClusterIssuer

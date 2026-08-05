@@ -18,6 +18,13 @@ traefik:
             permanent: true
     websecure:
       exposedPort: 443
+      # Entrypoint-level default middleware — applies to every router on
+      # :websecure automatically (same upgrade-insecure Middleware defined
+      # in templates/upgrade-insecure-middleware.yaml), so per-app tailnet
+      # Ingresses don't need the router.middlewares annotation just for this.
+      http:
+        middlewares:
+          - tailscale-upgrade-insecure@kubernetescrd
     # Non-privileged container port mapped to the privileged exposedPort via
     # the Service, same convention the chart already uses for websecure
     # (8443->443) — avoids needing NET_BIND_SERVICE for Traefik's own container.

@@ -29,12 +29,9 @@ metadata:
     # specifying entrypoints at all, this annotation is Traefik's own way
     # to fill that gap. Confirmed current for v3, not a v2-only annotation.
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    # CSP upgrade-insecure-requests — matches the old docker-compose Traefik
-    # setup. This instance's own copy of the middleware, in the tailscale
-    # namespace (see charts/traefik-tailnet/templates/upgrade-insecure-middleware.yaml)
-    # — not the kube-system one the LAN Ingress uses, this provider doesn't
-    # watch that namespace.
-    traefik.ingress.kubernetes.io/router.middlewares: tailscale-upgrade-insecure@kubernetescrd
+    # CSP upgrade-insecure-requests is applied automatically on :websecure via
+    # this instance's entrypoint default (see charts/traefik-tailnet/values.yaml),
+    # so no router.middlewares annotation is needed for it here.
 spec:
   ingressClassName: traefik-tailnet
   tls:
