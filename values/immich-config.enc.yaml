@@ -32,6 +32,9 @@ immich:
             library:
                 watch:
                     enabled: true
+                scan:
+                    enabled: true
+                    cronExpression: 0 * * * *
 sops:
     age:
         - enc: |
@@ -45,6 +48,6 @@ sops:
             -----END AGE ENCRYPTED FILE-----
           recipient: age1yubikey1qw8fz5uzfj5eayrrffqdztejc5yzjvhqahpx56lglktf0lm3g8qusuup9g8
     encrypted_regex: ^(password|clientId|clientSecret)$
-    lastmodified: "2026-07-26T10:40:23Z"
-    mac: ENC[AES256_GCM,data:Gco5Y6Uuhc0iBCyZ9CsOVSIJ/Pe+2YDcCJSIXT50MJFVfVjr3kZl9xmJatjn6lkHbztGjzzLUzWcJ+NNPdDxARlNqdjIArCwX1mcHgMPmdS9RG0pqKLZtuCupCCFJl58H5rziKjDAYPxWiNmyhnGyjO4dweXbXGeJsAXNMRPK30=,iv:WtELhdg8p2Mv7uwq2ZPbWgqYP+mmxO+XozUBxKyL6Y4=,tag:KXnC1p62yl1MdSI1Uzr/XA==,type:str]
+    lastmodified: "2026-08-05T06:26:00Z"
+    mac: ENC[AES256_GCM,data:BEKm2VRjiqYHrRcJe4X+5cS0S7Wxwy4MPOVBvFCE5AFn8pPNgPWnaBiFBT0E1mTeshG5KvInpBMDtzEyoChLOmCHxvwJdfHa+4yS8yaz2f/Yx8ZAzl97uoW4594IHKbJwd8RbeOJC5rBWJOyxHdWVJzUbRiV/0hK0EDYteMpioI=,iv:ucoOCqK9a5CdFVX0SokgGkQuD4HQ6+qfLREbW9zc5PI=,tag:uJjjG0oHu2Df2mWCOwycqA==,type:str]
     version: 3.13.2
