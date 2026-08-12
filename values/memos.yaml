@@ -1,3 +1,6 @@
+image:
+  tag: 0.30.0
+
 # Non-secret config for the memos chart. Safe to commit.
 host: memos.pi.home
 
