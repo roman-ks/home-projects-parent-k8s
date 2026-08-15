@@ -1,0 +1,17 @@
+pihole:
+  hostname: pi.home
+  cname: pihole.pi.home
+  ipAddress: 192.168.50.155
+  services:
+    - pihole
+    - traefik
+    - immich
+    - kopia
+    - auth
+    - ha
+    - gram
+    - memos 
+    - oci-registry
+    - ts-traefik
+  hosts: 
+    - "192.168.50.100 ml.immich.pi.home"
