@@ -9,3 +9,4 @@ jobs:
         run: |
             echo "This is ARC runner $RUNNER_NAME"
             uname -a
+            uname -m
