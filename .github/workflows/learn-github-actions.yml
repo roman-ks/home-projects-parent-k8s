@@ -1,0 +1,11 @@
+name: learn-github-actions
+run-name: ${{ github.actor }} is learning GitHub Actions
+on: [push]
+jobs:
+  check-bats-version:
+    runs-on: arc-runner-set
+    steps:
+      - name: Check runner
+        run: |
+            echo "This is ARC runner $RUNNER_NAME"
+            uname -a
