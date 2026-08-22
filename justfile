@@ -239,3 +239,65 @@ authentik-secret:
         -f "$tmp/immich.yaml" \
         -f "$tmp/memos.yaml"
 
+
+gha-runner-controller:
+    #!/usr/bin/env bash
+    NAMESPACE="arc-systems"
+    VERSION="0.14.2"
+    helm upgrade --install arc \
+        --namespace "${NAMESPACE}" \
+        --create-namespace \
+        --version ${VERSION} \
+        oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller
+
+gha-runner-set:
+    #!/usr/bin/env bash
+    INSTALLATION_NAME="arc-runner-set"
+    NAMESPACE="arc-runners"
+    GITHUB_CONFIG_URL="https://github.com/roman-ks/home-projects-parent-k8s"
+    helm upgrade --install "${INSTALLATION_NAME}" \
+        --namespace "${NAMESPACE}" \
+        --create-namespace \
+        --set githubConfigUrl="${GITHUB_CONFIG_URL}" \
+        --set githubConfigSecret=pre-defined-secret \
+        oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
+
+gha-runner-set-gram:
+    #!/usr/bin/env bash
+    INSTALLATION_NAME="arc-runner-set-gram"
+    NAMESPACE="arc-runners"
+    GITHUB_CONFIG_URL="https://github.com/roman-ks/gram"
+    helm upgrade --install "${INSTALLATION_NAME}" \
+        --namespace "${NAMESPACE}" \
+        --create-namespace \
+        --set githubConfigUrl="${GITHUB_CONFIG_URL}" \
+        --set githubConfigSecret=pre-defined-secret \
+        --set containerMode.type=dind \
+        oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
+
+gha-runner-secret:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    NAMESPACE="arc-runners"
+
+    tmp=$(mktemp -d "${XDG_RUNTIME_DIR:-/dev/shm}/gh-arc.XXXXXX")
+    trap 'rm -rf "$tmp"; stty sane 2>/dev/null || true' EXIT
+
+    kubectl create namespace ${NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
+
+    tmp_enc_yaml_file="$tmp/gh-arc.yaml"
+    cp "values/gh-arc.enc.yaml" "$tmp_enc_yaml_file"
+    echo $tmp_enc_yaml_file
+    echo ">>> Decrypting gh-arc.enc.yaml — enter PIN, then tap the YubiKey when it flashes..."
+    sops -d -i "$tmp_enc_yaml_file"
+    python3 -c "
+        import yaml;
+        with open('${tmp_enc_yaml_file}','r') as f:
+            data=yaml.safe_load(f);
+        print(data['githubConfigSecret'])
+        " | tr -d '\n' > "$tmp/gh-secret-val.txt"
+    kubectl create secret generic pre-defined-secret \
+        --namespace=${NAMESPACE} \
+        --from-file=github_token="$tmp/gh-secret-val.txt" \
+        --dry-run=client -o yaml | kubectl apply -f -
+
