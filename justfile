@@ -266,14 +266,12 @@ gha-runner-set-gram:
     #!/usr/bin/env bash
     INSTALLATION_NAME="arc-runner-set-gram"
     NAMESPACE="arc-runners"
-    GITHUB_CONFIG_URL="https://github.com/roman-ks/gram"
+    helm dependency update charts/gha-runner-set
+
     helm upgrade --install "${INSTALLATION_NAME}" \
         --namespace "${NAMESPACE}" \
         --create-namespace \
-        --set githubConfigUrl="${GITHUB_CONFIG_URL}" \
-        --set githubConfigSecret=pre-defined-secret \
-        --set containerMode.type=dind \
-        oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
+        ./charts/gha-runner-set
 
 gha-runner-secret:
     #!/usr/bin/env bash

@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: runner-tls
+  namespace: arc-runners
+spec:
+  secretName: runner-trust-ca-tls
+  dnsNames:
+    - unused-name-only-to-get-ca-crt.pi.home
+  issuerRef:
+    group: cert-manager.io
+    kind: ClusterIssuer
+    name: internal-ca
