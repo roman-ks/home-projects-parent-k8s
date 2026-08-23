@@ -16,6 +16,9 @@ metadata:
     # this instance's entrypoint default — see charts/traefik-tailnet/values.yaml
     # — so no router.middlewares annotation is needed for it here.)
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    # This ingress never gets loadbalancer ip/host so argocd treats it as creating. 
+    # Disable healtchech to not wait for ip which will never be present
+    argocd.argoproj.io/ignore-healthcheck: "true"
 spec:
   ingressClassName: traefik-tailnet
   tls:
