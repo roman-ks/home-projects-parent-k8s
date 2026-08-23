@@ -4,5 +4,6 @@ resources:
   - namespace.yaml
   - https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
   - server-ingress.yaml
+  - application-gram.yaml
 patches:
   - path: server-disable-tls.yaml
