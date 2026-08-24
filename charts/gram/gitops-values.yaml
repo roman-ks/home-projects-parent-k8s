@@ -2,6 +2,6 @@ gram:
   cname: "gram.pi.home"
   image:
     repository: "oci-registry.pi.home/gram"
-    tag: "61c6e1419aef809831e716a2522ce7925704df03"
+    tag: "4f91f821a5d902f2a215e14cdfcdea32ce9904d9"
   tlsSecretName: "gram-tls"
   pvHostPath: "/mnt/drive1/pv/gram"
