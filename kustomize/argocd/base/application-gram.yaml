@@ -13,7 +13,7 @@ spec:
         - gitops-values.yaml
     path: charts/gram
     repoURL: https://github.com/roman-ks/home-projects-parent-k8s.git
-    targetRevision: gha
+    targetRevision: main
   syncPolicy:
     automated:
       enabled: true

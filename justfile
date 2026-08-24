@@ -250,18 +250,6 @@ gha-runner-controller:
         --version ${VERSION} \
         oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller
 
-gha-runner-set:
-    #!/usr/bin/env bash
-    INSTALLATION_NAME="arc-runner-set"
-    NAMESPACE="arc-runners"
-    GITHUB_CONFIG_URL="https://github.com/roman-ks/home-projects-parent-k8s"
-    helm upgrade --install "${INSTALLATION_NAME}" \
-        --namespace "${NAMESPACE}" \
-        --create-namespace \
-        --set githubConfigUrl="${GITHUB_CONFIG_URL}" \
-        --set githubConfigSecret=pre-defined-secret \
-        oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
-
 gha-runner-set-gram:
     #!/usr/bin/env bash
     INSTALLATION_NAME="arc-runner-set-gram"
@@ -299,3 +287,6 @@ gha-runner-secret:
         --from-file=github_token="$tmp/gh-secret-val.txt" \
         --dry-run=client -o yaml | kubectl apply -f -
 
+argocd:
+    #!/usr/bin/env bash
+    kubectl apply -k kustomize/argocd/base/
