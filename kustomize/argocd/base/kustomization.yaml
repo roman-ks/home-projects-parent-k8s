@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: argocd
+resources:
+  - namespace.yaml
+  - https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+  - server-ingress.yaml
+  - application-gram.yaml
+patches:
+  - path: server-disable-tls.yaml
+secretGenerator:
+  - name: home-projects-parent-k8s-repo-creds
+    envs:
+      - gitops.env
+    options:
+      labels:
+        argocd.argoproj.io/secret-type: repository
+
+    

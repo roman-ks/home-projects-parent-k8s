@@ -13,5 +13,6 @@ pihole:
     - memos 
     - oci-registry
     - ts-traefik
+    - argocd
   hosts: 
     - "192.168.50.100 ml.immich.pi.home"
