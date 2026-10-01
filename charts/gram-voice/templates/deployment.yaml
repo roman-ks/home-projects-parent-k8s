@@ -23,12 +23,16 @@ spec:
         env:
         - name: SERVER_START_TIMEOUT
           value: 10m
+        - name: INPUT
+          value: /input
+        - name: SERVER_BINARY_PATH
+          value: "/app/whisper-server"
         volumeMounts:
         - name: gram-storage
           mountPath: /models
           subPath: model
         - name: gram-storage
-          mountPath: /app/input
+          mountPath: /input
           subPath: input
       volumes:
       - name: gram-storage
