@@ -1,4 +1,4 @@
 gramVoice:
   image:
     repository: "oci-registry.pi.home/gram-voice"
-    tag: "b3107b3388e36f4fbc6f785367dc5d2b82d2d1ab"
+    tag: "777a0f18242b82a4024948f059bd3eb03c04ea78"
