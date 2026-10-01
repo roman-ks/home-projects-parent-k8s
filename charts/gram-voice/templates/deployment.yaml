@@ -30,7 +30,7 @@ spec:
         volumeMounts:
         - name: gram-storage
           mountPath: /models
-          subPath: model
+          subPath: models
         - name: gram-storage
           mountPath: /input
           subPath: input
