@@ -23,7 +23,7 @@ spec:
         env:
         - name: SERVER_START_TIMEOUT
           value: 10m
-        - name: INPUT
+        - name: INPUT_FOLDER
           value: /input
         - name: SERVER_BINARY_PATH
           value: "/app/whisper-server"
