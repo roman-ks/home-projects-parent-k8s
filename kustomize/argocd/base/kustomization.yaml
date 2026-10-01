@@ -6,6 +6,7 @@ resources:
   - https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
   - server-ingress.yaml
   - application-gram.yaml
+  - application-gram-voice.yaml
 patches:
   - path: server-disable-tls.yaml
 secretGenerator:

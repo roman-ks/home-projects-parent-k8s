@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gram-voice
+  labels:
+    app: gram-voice
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: gram-voice
+  template:
+    metadata:
+      labels:
+        app: gram-voice
+        app.kubernetes.io/name: gram-voice
+    spec:
+      containers:
+      - name: gram-voice
+        image: "{{ .Values.gramVoice.image.repository }}:{{ .Values.gramVoice.image.tag }}"
+        volumeMounts:
+        - name: gram-storage
+          mountPath: /models
+          subPath: model
+        - name: gram-storage
+          mountPath: /app/input
+          subPath: input
+      volumes:
+      - name: gram-storage
+        persistentVolumeClaim:
+          claimName: gram-voice-pvc
+---
