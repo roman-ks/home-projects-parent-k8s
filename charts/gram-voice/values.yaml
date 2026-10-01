@@ -4,6 +4,6 @@ gramVoice:
     repository: ""
     tag: "latest"
   tlsSecretName: "gram-tls"
-  pvHostPath: "/mnt/pv/gram-voice"
+  pvHostPath: "/mnt/drive1/pv/gram-voice"
   # cert-manager issues + auto-renews the tlsSecretName above from this ClusterIssuer.
   clusterIssuer: internal-ca
