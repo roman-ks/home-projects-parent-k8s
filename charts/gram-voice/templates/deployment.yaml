@@ -20,6 +20,9 @@ spec:
       containers:
       - name: gram-voice
         image: "{{ .Values.gramVoice.image.repository }}:{{ .Values.gramVoice.image.tag }}"
+        env:
+        - name: SERVER_START_TIMEOUT
+          value: 10m
         volumeMounts:
         - name: gram-storage
           mountPath: /models
