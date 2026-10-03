@@ -27,6 +27,8 @@ spec:
           value: /input
         - name: SERVER_BINARY_PATH
           value: "/app/whisper-server"
+        - name: MODEL
+          value: "/models/ggml-large-v3-q5_0.bin"
         volumeMounts:
         - name: gram-storage
           mountPath: /models
