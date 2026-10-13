@@ -10,3 +10,7 @@ pihole:
   clusterIssuer: internal-ca
   # authentik SSO via the shared forwardAuth middleware (see charts/kopia).
   authMiddleware: kube-system-authentik-forward-auth@kubernetescrd
+pihole_controller:
+  image:
+    repository: ""
+    tag: "latest"

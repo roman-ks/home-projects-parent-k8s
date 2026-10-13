@@ -250,16 +250,21 @@ gha-runner-controller:
         --version ${VERSION} \
         oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller
 
-gha-runner-set-gram:
+_gha-runner-set installation_name git_url:
     #!/usr/bin/env bash
-    INSTALLATION_NAME="arc-runner-set-gram"
     NAMESPACE="arc-runners"
     helm dependency update charts/gha-runner-set
 
-    helm upgrade --install "${INSTALLATION_NAME}" \
+    helm upgrade --install "{{installation_name}}" \
         --namespace "${NAMESPACE}" \
         --create-namespace \
+        --set gha-runner-scale-set.githubConfigUrl={{git_url}} \
         ./charts/gha-runner-set
+
+gha-runner-set-gram: (_gha-runner-set "arc-runner-set-gram" "https://github.com/roman-ks/gram")
+
+# todo: investigate hot to reuse runner-tls secret for multiple deployments
+gha-runner-set-pihole-controller: (_gha-runner-set "arc-runner-set-pihole" "https://github.com/roman-ks/pihole-controller")
 
 gha-runner-secret:
     #!/usr/bin/env bash

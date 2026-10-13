@@ -1,9 +1,3 @@
-{{- $cnames := "" -}}
-{{ range .Values.pihole.services }}
-  {{- $cnames = printf "%s;%s.%s,%s" $cnames . $.Values.pihole.hostname $.Values.pihole.hostname | trimSuffix "," -}}
-{{ end }}
-{{- $cnames := trimPrefix ";" $cnames -}}
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -48,7 +42,7 @@ spec:
         - name: FTLCONF_dns_hostRecord
           value: {{ .Values.pihole.hostname }},{{ .Values.pihole.ipAddress }}
         - name: FTLCONF_dns_cnameRecords
-          value: {{ $cnames }}
+          value: ""
         - name: FTLCONF_dns_hosts
           value: {{ .Values.pihole.hosts | join " " }}
 
