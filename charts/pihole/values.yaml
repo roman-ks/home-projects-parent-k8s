@@ -13,4 +13,4 @@ pihole:
 pihole_controller:
   image:
     repository: ""
-    tag: "latest"
+    tag: ""
