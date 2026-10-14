@@ -15,12 +15,14 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: pihole-controller-serviceaccount
+  namespace: {{ .Release.Namespace }}
 ---
 
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: pihole-controller
+  namespace: {{ .Release.Namespace }}
 subjects:
 - kind: ServiceAccount
   name: pihole-controller-serviceaccount
