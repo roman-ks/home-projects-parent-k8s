@@ -17,8 +17,9 @@ spec:
         app: pihole-controller
         app.kubernetes.io/name: pihole-controller
     spec:
+      serviceAccountName: pihole-controller-serviceaccount
       containers:
       - name: controller
-        image: {{ .Values.pihole_controller.image.repository }}:{{ .Values.pihole_controller.image.tag }}
+        image: "{{ .Values.pihole_controller.image.repository }}:{{ .Values.pihole_controller.image.tag }}"
 
 ---

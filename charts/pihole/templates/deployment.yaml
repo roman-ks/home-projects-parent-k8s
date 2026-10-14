@@ -36,7 +36,7 @@ spec:
         - name: TZ
           value: "Europe/Kyiv"
         - name: FTLCONF_webserver_api_password
-          value: ""
+          value: "oci-registry.pi.home,pi.home"
         - name: FTLCONF_dns_listeningMode
           value: "SINGLE"
         - name: FTLCONF_dns_hostRecord

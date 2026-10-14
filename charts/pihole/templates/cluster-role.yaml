@@ -1,0 +1,31 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: pihole-controller
+rules:
+- apiGroups: ["networking.k8s.io"]
+  resources: ["ingresses"]
+  verbs: ["get", "watch", "list"]
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get", "watch", "list","update"]
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pihole-controller-serviceaccount
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: pihole-controller
+subjects:
+- kind: ServiceAccount
+  name: pihole-controller-serviceaccount
+roleRef:
+  kind: ClusterRole
+  name: pihole-controller
+  apiGroup: rbac.authorization.k8s.io
+
