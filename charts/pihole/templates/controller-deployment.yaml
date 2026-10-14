@@ -21,5 +21,8 @@ spec:
       containers:
       - name: controller
         image: "{{ .Values.pihole_controller.image.repository }}:{{ .Values.pihole_controller.image.tag }}"
+        env:
+        - name: PIHOLE_NS
+          value: {{ .Release.Namespace }}
 
 ---
