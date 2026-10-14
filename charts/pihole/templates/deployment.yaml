@@ -36,13 +36,13 @@ spec:
         - name: TZ
           value: "Europe/Kyiv"
         - name: FTLCONF_webserver_api_password
-          value: "oci-registry.pi.home,pi.home"
+          value: ""
         - name: FTLCONF_dns_listeningMode
           value: "SINGLE"
         - name: FTLCONF_dns_hostRecord
           value: {{ .Values.pihole.hostname }},{{ .Values.pihole.ipAddress }}
         - name: FTLCONF_dns_cnameRecords
-          value: ""
+          value: "oci-registry.pi.home,pi.home"
         - name: FTLCONF_dns_hosts
           value: {{ .Values.pihole.hosts | join " " }}
 
