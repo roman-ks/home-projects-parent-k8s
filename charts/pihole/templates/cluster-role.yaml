@@ -25,6 +25,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: pihole-controller-serviceaccount
+  namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
   name: pihole-controller
