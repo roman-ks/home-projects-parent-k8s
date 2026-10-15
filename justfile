@@ -296,6 +296,12 @@ argocd:
     #!/usr/bin/env bash
     kubectl apply -k kustomize/argocd/base/
 
+age-secret:
+    #!/usr/bin/env bash
+    cat age.agekey |
+        kubectl create secret generic sops-age \
+        -n argocd --from-file=keys.txt=/dev/stdin
+
 argocd-helm: 
     #!/usr/bin/env bash
     helm repo add argo https://argoproj.github.io/argo-helm
