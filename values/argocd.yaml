@@ -1,0 +1,11 @@
+global:
+  domain: argocd.pi.home
+server:
+  ingress: 
+    enabled: true
+    tls: true
+    annotations:
+      cert-manager.io/cluster-issuer: internal-ca
+configs:
+  params:
+    server.insecure: true

@@ -295,3 +295,15 @@ gha-runner-secret:
 argocd:
     #!/usr/bin/env bash
     kubectl apply -k kustomize/argocd/base/
+
+argocd-helm: 
+    #!/usr/bin/env bash
+    helm repo add argo https://argoproj.github.io/argo-helm
+    helm repo update
+        #!/usr/bin/env bash
+    NAMESPACE="argo-helm"
+
+    helm upgrade --install "argocd" \
+        --namespace "${NAMESPACE}" \
+        --create-namespace \
+        argo/argo-cd -f values/argocd.yaml
