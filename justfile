@@ -317,3 +317,5 @@ argocd:
         --namespace "${NAMESPACE}" \
         --create-namespace \
         argo/argo-cd -f values/argocd.yaml
+    
+    kubectl apply -f values/argocd-root-app.yaml
