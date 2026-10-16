@@ -292,22 +292,26 @@ gha-runner-secret:
         --from-file=github_token="$tmp/gh-secret-val.txt" \
         --dry-run=client -o yaml | kubectl apply -f -
 
+_k8s-secret secret-path ns:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    tmp=$(mktemp -d "${XDG_RUNTIME_DIR:-/dev/shm}/XXXXXXXXX")
+    tmp_file="$tmp/tmp.yaml"
+    trap 'rm -rf "$tmp"; stty sane 2>/dev/null || true' EXIT
+    kubectl create namespace {{ns}} --dry-run=client -o yaml | kubectl apply -f -
+    cp {{secret-path}} "$tmp_file"
+    echo ">>> Decrypting {{secret-path}} — enter PIN, then tap the YubiKey when it flashes..."
+    sops -d -i "$tmp_file"
+    kubectl apply -n {{ns}} -f "$tmp_file"
+
+argocd-secrets: (_k8s-secret "values/argocd-age.enc.yaml" "argocd") (_k8s-secret "values/argocd-repo.enc.yaml" "argocd") 
+
 argocd:
-    #!/usr/bin/env bash
-    kubectl apply -k kustomize/argocd/base/
-
-age-secret:
-    #!/usr/bin/env bash
-    cat age.agekey |
-        kubectl create secret generic sops-age \
-        -n argocd --from-file=keys.txt=/dev/stdin
-
-argocd-helm: 
     #!/usr/bin/env bash
     helm repo add argo https://argoproj.github.io/argo-helm
     helm repo update
         #!/usr/bin/env bash
-    NAMESPACE="argo-helm"
+    NAMESPACE="argocd"
 
     helm upgrade --install "argocd" \
         --namespace "${NAMESPACE}" \
