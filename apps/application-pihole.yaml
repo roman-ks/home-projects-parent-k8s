@@ -26,5 +26,5 @@ spec:
   ignoreDifferences:
     - group: apps
       kind: Deployment
-      jqPathExpression:
+      jqPathExpressions:
         - .spec.template.spec.containers[0].env[] | select(.name==\"FTLCONF_dns_cnameRecords\")
