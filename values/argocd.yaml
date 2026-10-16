@@ -118,3 +118,7 @@ repoServer:
       volumeMounts:
         - mountPath: /gitops-tools
           name: gitops-tools
+  dnsConfig:
+    nameservers:
+      - 1.1.1.1
+      - 1.0.0.1
