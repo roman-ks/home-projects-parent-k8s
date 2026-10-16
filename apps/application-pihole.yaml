@@ -20,6 +20,11 @@ spec:
     automated:
       enabled: true
       prune: true
-      selfHeal: false
+      selfHeal: true
     syncOptions:
       - CreateNamespace=true
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jqPathExpression:
+        - .spec.template.spec.containers[0].env[] | select(.name==\"FTLCONF_dns_cnameRecords\")
