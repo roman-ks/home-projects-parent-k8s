@@ -12,13 +12,14 @@ spec:
       valueFiles:
         - gitops-values.yaml
         - ../../values/pihole.yaml
+        - secrets://secret.enc.yaml
     path: charts/pihole
     repoURL: https://github.com/roman-ks/home-projects-parent-k8s.git
-    targetRevision: pihole-controller
+    targetRevision: argocd-helm
   syncPolicy:
     automated:
       enabled: true
       prune: true
-      selfHeal: true
+      selfHeal: false
     syncOptions:
       - CreateNamespace=true
