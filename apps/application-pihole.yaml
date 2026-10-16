@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: pihole
+spec:
+  destination:
+    namespace: pihole
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    helm:
+      valueFiles:
+        - gitops-values.yaml
+        - ../../values/pihole.yaml
+        - secrets://secret.enc.yaml
+    path: charts/pihole
+    repoURL: https://github.com/roman-ks/home-projects-parent-k8s.git
+    targetRevision: argocd-helm
+  syncPolicy:
+    automated:
+      enabled: true
+      prune: true
+      selfHeal: false
+    syncOptions:
+      - CreateNamespace=true
