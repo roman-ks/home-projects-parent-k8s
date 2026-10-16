@@ -56,5 +56,6 @@ spec:
           sleep 30
           sqlite3 /etc/pihole/gravity.db "insert into adlist(address, enabled) values ("$BLOCKLIST", 1);"
           pihole -g
+          sleep infinity
 
 ---
