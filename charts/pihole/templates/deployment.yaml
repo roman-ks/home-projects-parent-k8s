@@ -45,5 +45,16 @@ spec:
           value: "oci-registry.pi.home,pi.home"
         - name: FTLCONF_dns_hosts
           value: {{ .Values.pihole.hosts | join " " }}
+        - name: BLOCKLIST
+          value: {{ .Values.pihole.blocklist }}
+        command: ["/bin/bash", "-c"]
+        args:
+        - |
+          start.sh &
+          apk update
+          apt install sqlite3
+          sleep 30
+          sqlite3 /etc/pihole/gravity.db "insert into adlist(address, enabled) values ("$BLOCKLIST", 1);"
+          pihole -g
 
 ---
