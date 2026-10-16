@@ -53,8 +53,8 @@ spec:
           start.sh &
           apk update
           apk add sqlite
-          sleep 60
-          sqlite3 /etc/pihole/gravity.db "insert into adlist(address, enabled) values ("$BLOCKLIST", 1);"
+          sleep 30
+          sqlite3 /etc/pihole/gravity.db "insert into adlist(address, enabled) values ('"$BLOCKLIST"', 1);"
           pihole -g
           sleep infinity
 
