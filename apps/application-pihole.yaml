@@ -27,4 +27,4 @@ spec:
     - group: apps
       kind: Deployment
       jqPathExpressions:
-        - .spec.template.spec.containers[0].env[] | select(.name==\"FTLCONF_dns_cnameRecords\")
+        - .spec.template.spec.containers[0].env[] | select(.name=="FTLCONF_dns_cnameRecords")
