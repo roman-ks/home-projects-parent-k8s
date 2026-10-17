@@ -24,12 +24,6 @@ pki:
     helm upgrade --install pki ./charts/pki \
         --namespace cert-manager
 
-pihole:
-    helm upgrade --install pihole ./charts/pihole \
-        --namespace default \
-        -f values/pihole.yaml
-
-
 oci-registry:
     helm upgrade --install oci-registry ./charts/oci-registry \
         --namespace default \
