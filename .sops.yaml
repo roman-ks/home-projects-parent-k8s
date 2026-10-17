@@ -11,4 +11,4 @@ creation_rules:
   - path_regex: '.*\.enc\.yaml$'
     age:
       - age1yubikey1qw8fz5uzfj5eayrrffqdztejc5yzjvhqahpx56lglktf0lm3g8qusuup9g8
-      - age1zv7mvywjtrfzuju2zu78m52jfw7y8h6hppx82l0re6m3pktc4ylsuqgzuw
+      - age1qaemxfed6g0ps792e03y9yjt2x9m5n6h3a78d7nw9vwje0ktaszsjrjw5x
