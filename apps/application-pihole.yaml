@@ -14,7 +14,7 @@ spec:
         - secrets://secret.enc.yaml
     path: charts/pihole
     repoURL: https://github.com/roman-ks/home-projects-parent-k8s.git
-    targetRevision: pihole-controller
+    targetRevision: main
   syncPolicy:
     automated:
       enabled: true
