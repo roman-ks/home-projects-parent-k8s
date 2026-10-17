@@ -1,12 +1,15 @@
 pihole:
-  hostname: ""
-  ipAddress: ""
-  cname: ""
-  cnameRecords: ""
-  services: []
+  hostname: pi.home
+  ipAddress: 192.168.50.155
+  cname: pihole.pi.home
   tlsSecretName: "pihole-tls"
-  hosts: []
+  hosts: 
+    - "192.168.50.100 ml.immich.pi.home"
   # cert-manager issues + auto-renews the tlsSecretName above from this ClusterIssuer.
   clusterIssuer: internal-ca
   # authentik SSO via the shared forwardAuth middleware (see charts/kopia).
   authMiddleware: kube-system-authentik-forward-auth@kubernetescrd
+pihole_controller:
+  image:
+    repository: ""
+    tag: ""

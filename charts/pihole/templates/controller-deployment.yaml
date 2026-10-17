@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pihole-controller
+  labels:
+    app: pihole-controller
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: pihole-controller
+  template:
+    metadata:
+      labels:
+        app: pihole-controller
+        app.kubernetes.io/name: pihole-controller
+    spec:
+      serviceAccountName: pihole-controller-serviceaccount
+      containers:
+      - name: controller
+        image: "{{ .Values.pihole_controller.image.repository }}:{{ .Values.pihole_controller.image.tag }}"
+        env:
+        - name: PIHOLE_NS
+          value: {{ .Release.Namespace }}
+
+---

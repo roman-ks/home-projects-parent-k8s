@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: pihole
+spec:
+  destination:
+    namespace: pihole
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    helm:
+      valueFiles:
+        - gitops-values.yaml
+        - secrets://secret.enc.yaml
+    path: charts/pihole
+    repoURL: https://github.com/roman-ks/home-projects-parent-k8s.git
+    targetRevision: pihole-controller
+  syncPolicy:
+    automated:
+      enabled: true
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jqPathExpressions:
+        - .spec.template.spec.containers[0].env[] | select(.name=="FTLCONF_dns_cnameRecords")

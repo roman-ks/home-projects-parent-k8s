@@ -1,9 +1,3 @@
-{{- $cnames := "" -}}
-{{ range .Values.pihole.services }}
-  {{- $cnames = printf "%s;%s.%s,%s" $cnames . $.Values.pihole.hostname $.Values.pihole.hostname | trimSuffix "," -}}
-{{ end }}
-{{- $cnames := trimPrefix ";" $cnames -}}
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -48,8 +42,20 @@ spec:
         - name: FTLCONF_dns_hostRecord
           value: {{ .Values.pihole.hostname }},{{ .Values.pihole.ipAddress }}
         - name: FTLCONF_dns_cnameRecords
-          value: {{ $cnames }}
+          value: "oci-registry.pi.home,pi.home"
         - name: FTLCONF_dns_hosts
           value: {{ .Values.pihole.hosts | join " " }}
+        - name: BLOCKLIST
+          value: {{ .Values.pihole.blocklist }}
+        command: ["/bin/bash", "-c"]
+        args:
+        - |
+          start.sh &
+          apk update
+          apk add sqlite
+          sleep 30
+          sqlite3 /etc/pihole/gravity.db "insert into adlist(address, enabled) values ('"$BLOCKLIST"', 1);"
+          pihole -g
+          sleep infinity
 
 ---
