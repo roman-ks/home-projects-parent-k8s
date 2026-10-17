@@ -1,0 +1,4 @@
+dnsStub:
+  image:
+    repository: oci-registry.pi.home/tailscale-dns-stub
+    tag: "0.3.0"
