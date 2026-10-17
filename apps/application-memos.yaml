@@ -10,7 +10,6 @@ spec:
   source:
     helm:
       valueFiles:
-        - gitops-values.yaml
         - secrets://secret.enc.yaml
     path: charts/memos
     repoURL: https://github.com/roman-ks/home-projects-parent-k8s.git
