@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gram
+spec:
+  destination:
+    namespace: gram
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    helm:
+      valueFiles:
+        - gitops-values.yaml
+        - secrets://secret.enc.yaml
+    path: charts/memo
+    repoURL: https://github.com/roman-ks/home-projects-parent-k8s.git
+    targetRevision: argocd-apps-migration
+  syncPolicy:
+    automated:
+      enabled: true
+      prune: true
+      selfHeal: true

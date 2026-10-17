@@ -10,7 +10,7 @@ spec:
     namespace: argocd
   source:
     repoURL: https://github.com/roman-ks/home-projects-parent-k8s.git
-    targetRevision: main
+    targetRevision: argocd-apps-migration
     path: apps/
   syncPolicy:
     automated:
