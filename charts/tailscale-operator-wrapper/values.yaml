@@ -59,17 +59,13 @@ dnsStub:
   image:
     repository: oci-registry.pi.home/dns-stub
     tag: "0.3.0"
-  # No more per-hostname map — every current and future *.pi.home name points
-  # at the same shared Traefik-tailnet target (Task 3 consolidation), so the
-  # stub just answers every query with this one IP unconditionally. Adding a
-  # new service (auth.pi.home, and whatever comes after it) needs zero
-  # changes here — only its own second Ingress, same as Memos/Auth already
-  # got. See ai-fluency/tailscale-tasks-v2.md Task 5 for why this is a direct
-  # IP, not a CNAME.
-  targetIP: "100.119.153.34"
   # This service's own tailnet name (needs exposure too — Split DNS points at
   # its tailnet IP, which requires it to be a tailnet member itself).
   hostname: dns-stub
+  checkInterval: 5m
+  targetTailnetHostname: traefik-tailnet
+  clientId: ""
+  clientSecret: ""
 
 traefik:
   ports:
