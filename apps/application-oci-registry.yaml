@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gram
+spec:
+  destination:
+    namespace: gram
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: charts/gram
+    repoURL: https://github.com/roman-ks/home-projects-parent-k8s.git
+    targetRevision: main
+  syncPolicy:
+    automated:
+      enabled: true
+      prune: true
+      selfHeal: true

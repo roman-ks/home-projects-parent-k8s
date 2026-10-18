@@ -1,5 +1,5 @@
-oci_registry:
-  cname: ""
+oci_registry: 
+  cname: oci-registry.pi.home
   tlsSecretName: oci-registry-tls
   pvHostPath: "/mnt/pv/oci-registry"
   # cert-manager issues + auto-renews the tlsSecretName above from this ClusterIssuer.
