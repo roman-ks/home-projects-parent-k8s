@@ -1,10 +1,10 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: runner-tls
+  name: {{ .Release.Name }}-tls
   namespace: arc-runners
 spec:
-  secretName: runner-trust-ca-tls
+  secretName: {{ .Release.Name }}-trust-ca-tls
   dnsNames:
     - unused-name-only-to-get-ca-crt.pi.home
   issuerRef:

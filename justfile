@@ -252,13 +252,17 @@ _gha-runner-set installation_name git_url:
     helm upgrade --install "{{installation_name}}" \
         --namespace "${NAMESPACE}" \
         --create-namespace \
+        -f charts/gha-runner-set/values.yaml \
+        --set gha-runner-scale-set.githubConfigUrl={{git_url}} \
+        --set gha-runner-scale-set.template.spec.volumes[3].secret.secretName={{installation_name}}-trust-ca-tls \
         --set gha-runner-scale-set.githubConfigUrl={{git_url}} \
         ./charts/gha-runner-set
 
 gha-runner-set-gram: (_gha-runner-set "arc-runner-set-gram" "https://github.com/roman-ks/gram")
 
-# todo: investigate hot to reuse runner-tls secret for multiple deployments
 gha-runner-set-pihole-controller: (_gha-runner-set "arc-runner-set-pihole" "https://github.com/roman-ks/pihole-controller")
+
+gha-runner-set-tailscale-dns-stub: (_gha-runner-set "arc-runner-set-tailscale-dns-stub" "https://github.com/roman-ks/tailscale-dns-stub")
 
 gha-runner-secret:
     #!/usr/bin/env bash
