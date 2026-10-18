@@ -1,14 +1,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: gram
+  name: oci-registry
 spec:
   destination:
-    namespace: gram
+    namespace: degault
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: charts/gram
+    path: charts/oci-registry
     repoURL: https://github.com/roman-ks/home-projects-parent-k8s.git
     targetRevision: main
   syncPolicy:
