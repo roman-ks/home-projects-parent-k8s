@@ -41,7 +41,7 @@ tailscale-operator:
 # run after the CRD from the first pass has registered, not part of the same
 # install. The `tailscale-operator` justfile recipe handles both passes.
 proxyClass:
-  create: false
+  create: true
   resources:
     requests:
       cpu: 10m
