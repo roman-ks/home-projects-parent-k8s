@@ -10,7 +10,7 @@ spec:
   source:
     helm:
       valueFiles:
-        - secrets://authentik-secrets.enc.yaml
+        - secrets://secrets.enc.yaml
     path: charts/authentik-wrapper
     repoURL: https://github.com/roman-ks/home-projects-parent-k8s.git
     targetRevision: argocd-apps-migration
