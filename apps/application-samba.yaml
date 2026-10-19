@@ -11,7 +11,7 @@ spec:
     helm:
       valueFiles:
         - secrets://secret.enc.yaml
-    path: charts/wamba
+    path: charts/samba
     repoURL: https://github.com/roman-ks/home-projects-parent-k8s.git
     targetRevision: argocd-apps-migration
   syncPolicy:
