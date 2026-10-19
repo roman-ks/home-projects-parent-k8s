@@ -1,0 +1,17 @@
+# Non-secret kopia config for the `gram` target — release kopia-gram.
+# Secrets (bucket, S3 creds, repo password) live in values/kopia-gram.enc.yaml.
+repo:
+  region: us-east-1
+  hostname: pi-kopia
+  username: nobody
+  secretName: kopia-gram-secrets
+
+source:
+  path: /data
+  hostPath: /mnt/drive1/pv/gram
+
+schedule: "10 3 * * *"
+
+server:
+  enabled: true
+  host: kopia-gram.pi.home

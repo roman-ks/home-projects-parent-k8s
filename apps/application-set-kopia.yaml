@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: kopia
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+  - list:
+      elements:
+      - app: gram
+      - app: immich
+      - app: memos
+  template:
+    metadata:
+      name: 'kopia-{{.app}}'
+    spec:
+      destination:
+        namespace: kopia
+        server: https://kubernetes.default.svc
+      project: default
+      source:
+        helm:
+          valueFiles:
+            - '{{.app}}}-values.enc.yaml'
+            - 'secrets://{{.app}}}-secret.enc.yaml'
+        path: charts/kopia
+        repoURL: https://github.com/roman-ks/home-projects-parent-k8s.git
+        targetRevision: argocd-apps-migration
+      syncPolicy:
+        automated:
+          enabled: true
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
