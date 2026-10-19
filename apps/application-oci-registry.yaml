@@ -4,7 +4,7 @@ metadata:
   name: oci-registry
 spec:
   destination:
-    namespace: degault
+    namespace: default
     server: https://kubernetes.default.svc
   project: default
   source:
