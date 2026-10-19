@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: samba
+spec:
+  destination:
+    namespace: samba
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    helm:
+      valueFiles:
+        - secrets://secret.enc.yaml
+    path: charts/wamba
+    repoURL: https://github.com/roman-ks/home-projects-parent-k8s.git
+    targetRevision: argocd-apps-migration
+  syncPolicy:
+    automated:
+      enabled: true
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
