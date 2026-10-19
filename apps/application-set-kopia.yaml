@@ -22,7 +22,7 @@ spec:
       source:
         helm:
           valueFiles:
-            - '{{.app}}-values.enc.yaml'
+            - '{{.app}}-values.yaml'
             - 'secrets://{{.app}}-secret.enc.yaml'
         path: charts/kopia
         repoURL: https://github.com/roman-ks/home-projects-parent-k8s.git
