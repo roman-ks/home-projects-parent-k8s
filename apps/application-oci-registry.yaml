@@ -10,7 +10,7 @@ spec:
   source:
     path: charts/oci-registry
     repoURL: https://github.com/roman-ks/home-projects-parent-k8s.git
-    targetRevision: main
+    targetRevision: argocd-apps-migration
   syncPolicy:
     automated:
       enabled: true
