@@ -4,7 +4,7 @@ metadata:
   name: gh-arc-controller
 spec:
   destination:
-    namespace: arc-system
+    namespace: arc-systems
     server: https://kubernetes.default.svc
   project: default
   source:
