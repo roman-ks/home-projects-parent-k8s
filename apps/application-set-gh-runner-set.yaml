@@ -26,7 +26,7 @@ spec:
         helm:
           valueFiles:
             - 'secrets://secret.enc.yaml'
-          valueObject:
+          valuesObject:
             gha-runner-scale-set:
               githubConfigUrl: '{{.repoUrl}}'
         path: charts/gha-runner-set
