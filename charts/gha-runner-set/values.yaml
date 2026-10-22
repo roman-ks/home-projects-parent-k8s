@@ -1,3 +1,4 @@
-controllerServiceAccount:
-  namespace: arc-system
-  name: gh-arc-controller-gha-rs-controller
+gha-runner-scale-set:
+  controllerServiceAccount:
+    namespace: arc-system
+    name: gh-arc-controller-gha-rs-controller
