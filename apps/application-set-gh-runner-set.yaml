@@ -24,12 +24,11 @@ spec:
       project: default
       source:
         helm:
-          # valueFiles:
-            # - 'secrets://secret.enc.yaml'
+          valueFiles:
+            - 'secrets://secret.enc.yaml'
           valuesObject:
             gha-runner-scale-set:
               githubConfigUrl: '{{.repoUrl}}'
-              githubConfigSecret: pre-defined-secret
         path: charts/gha-runner-set
         repoURL: https://github.com/roman-ks/home-projects-parent-k8s.git
         targetRevision: argocd-apps-migration
