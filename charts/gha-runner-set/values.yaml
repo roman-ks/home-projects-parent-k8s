@@ -2,3 +2,4 @@ gha-runner-scale-set:
   controllerServiceAccount:
     namespace: arc-systems
     name: gh-arc-controller-gha-rs-controller
+  containerMode: dind
