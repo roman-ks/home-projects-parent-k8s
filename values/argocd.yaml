@@ -122,3 +122,20 @@ repoServer:
     nameservers:
       - 1.1.1.1
       - 1.0.0.1
+
+dex:
+  env:
+    - name: SSL_CERT_DIR
+      value: /etc/ssl/certs
+  volumeMounts:
+    - name: ca
+      mountPath: /etc/ssl/certs/ca.crt
+      subPath: ca.crt
+      readOnly: true
+  volumes:
+    - name: ca
+      secret:
+        secretName: argocd-server-tls
+        items:
+          - key: ca.crt
+            path: ca.crt
