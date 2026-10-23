@@ -112,3 +112,8 @@ memos:
   oidc:
     clientId: ""
     clientSecret: ""
+
+argocd:
+  oidc:
+    clientId: ""
+    clientSecret: ""
