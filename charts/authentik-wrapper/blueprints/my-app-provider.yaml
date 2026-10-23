@@ -78,10 +78,10 @@ entries:
       signing_key: !KeyOf custom-root-ca
   - model: authentik_core.application
     identifiers:
-      slug: oidc-argocd
+      slug: oidc-memos
     attrs:
-      provider: !KeyOf oidc-argocd-provider
-      name: OIDC ArgoCD
+      provider: !KeyOf oidc-memos-provider
+      name: OIDC Memos
   - model: authentik_providers_oauth2.oauth2provider
     id: oidc-argocd-provider
     identifiers:
