@@ -17,7 +17,7 @@ configs:
       https
   rbac:
     policy.csv: |
-      g, ArgoCD Admins, role:admin
+      g, argocd-admins, role:admin
 
 repoServer:
   env:

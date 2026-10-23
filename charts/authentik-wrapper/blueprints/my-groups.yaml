@@ -5,7 +5,6 @@ version: 1
 entries:
   - attrs:
       is_superuser: false
-      name: ArgoCD Admins
     model: authentik_core.group
     identifiers: 
       name: argocd-admins
