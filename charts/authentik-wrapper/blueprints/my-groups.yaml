@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=https://goauthentik.io/blueprints/schema.json
+metadata:
+  name: My - Groups
+version: 1
+entries:
+  - attrs:
+      is_superuser: false
+      name: ArgoCD Admins
+    model: authentik_core.group
+    identifiers: 
+      name: argocd-admins
