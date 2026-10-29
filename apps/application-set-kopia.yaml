@@ -26,7 +26,7 @@ spec:
             - 'secrets://{{.app}}-secret.enc.yaml'
         path: charts/kopia
         repoURL: https://github.com/roman-ks/home-projects-parent-k8s.git
-        targetRevision: argocd-apps-migration
+        targetRevision: main
       syncPolicy:
         automated:
           enabled: true
