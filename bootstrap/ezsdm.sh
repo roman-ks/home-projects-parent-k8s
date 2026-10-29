@@ -8,6 +8,10 @@ function errexit() {
 img="$1"
 [ "$img" == "" ] && errexit "? No IMG specified"
 
+root_ca_crt="$2"
+[ "$root_ca_crt" == "" ] && errexit "? No Root CA cert"
+
+
 [ "$(type -p sdm)" == "" ] && errexit "? sdm is not installed"
 
 # Create a fresh working copy
@@ -44,6 +48,14 @@ copyfile:"from=$assets/provision.sh|to=/usr/local/sbin/"
 
 # Create directory needed by defer-plugin
 mkdir:dir=/etc/sdm/assets/defer-plugin
+
+# Create directory for k3s configs
+copydir:"from=$assets/var/|to=/var"
+mkdir:dir=/etc/rancher/k3s/
+copyfile:"from=$assets/etc/rancher/k3s/registries.yaml|to=/etc/rancher/k3s/"
+mkdir:"dir=/etc/rancher/k3s/certs"
+copyfile:"from=$root_ca_crt|to=/etc/rancher/k3s/certs/"
+
  
 EOF
     ) | bash -c "cat >>$assets/my.plugins"
@@ -61,7 +73,6 @@ echo $"
 Use sdm to burn the disk and create SSH Host Keys:
 sdm --ddsw "bs=16M" --burn /dev/sdX --hostname raspberrypi \"$work_img\" --expand-root \\
     --plugin sshhostkey:generate-keys \\
-    --plugin cryptroot:\"authkeys=/home/roman/.ssh/authorized_keys|ssh|crypto=xchacha\" \\
     --plugin defer-plugin:\"defer-command:/usr/local/sbin/provision.sh\"
 
 Once in Dropbear use:
