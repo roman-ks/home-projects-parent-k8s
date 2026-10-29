@@ -13,7 +13,7 @@ spec:
         - secrets://secret.enc.yaml
     path: charts/cert-manager
     repoURL: https://github.com/roman-ks/home-projects-parent-k8s.git
-    targetRevision: main
+    targetRevision: sdm-bootstrap
   syncPolicy:
     automated:
       enabled: true

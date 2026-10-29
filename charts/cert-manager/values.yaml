@@ -1,3 +1,8 @@
+cert-manager:
+  crds:
+    enabled: true
+    keep: true
+
 # ---------------------------------------------------------------------------
 # PKI (PKI policy) — internal CA ClusterIssuer + self-signed issuer
 # ---------------------------------------------------------------------------
