@@ -95,3 +95,25 @@ signing:
   # Self-signed issuer — the signing key is independent of the TLS CA; OIDC
   # clients verify tokens via authentik's JWKS, not certificate chain.
   issuerName: selfsigned
+
+# Secrets values are supplied at apply time from sops-encrypted files
+authentikSecret:
+  secretKey: ""
+  postgresql:
+    user: authentik
+    password: ""
+
+immich:
+  oidc:
+    clientId: ""
+    clientSecret: ""
+
+memos:
+  oidc:
+    clientId: ""
+    clientSecret: ""
+
+argocd:
+  oidc:
+    clientId: ""
+    clientSecret: ""

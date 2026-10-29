@@ -1,6 +1,6 @@
 image:
   repository: neosmemo/memos
-  tag: stable
+  tag: 0.31.0
   pullPolicy: IfNotPresent
 
 # Public hostname. Used for the ingress host and MEMOS_INSTANCE_URL.
@@ -18,6 +18,9 @@ ingress:
 persistence:
   storageClass: encrypted-local-path
   size: 5Gi
+  # Static PV (templates/persistent-volume.yaml) so kopia has a stable path to
+  # back up — dynamic provisioning would embed the PVC's UID in the dir name.
+  hostPath: /mnt/drive1/pv/memos
   # memos stores its sqlite DB + assets here (container path /var/opt/memos).
 
 # Tailnet routing: templates/tailscale-ingress.yaml, a second Ingress

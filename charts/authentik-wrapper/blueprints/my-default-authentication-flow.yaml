@@ -56,7 +56,9 @@ entries:
     name: my-authentication-identification
   id: my-authentication-identification
   model: authentik_stages_identification.identificationstage
-- identifiers:
+- attrs:
+    session_duration: days=7
+  identifiers:
     name: my-authentication-login
   id: my-authentication-login
   model: authentik_stages_user_login.userloginstage

@@ -30,5 +30,18 @@ spec:
               containerPort: 53
               protocol: TCP
           env:
-            - name: TARGET_IP
-              value: {{ .Values.dnsStub.targetIP | quote }}
+            - name: CHECK_INTERVAL
+              value: {{ .Values.dnsStub.checkInterval | quote }}
+            - name: TARGET_TAILNET_HOSTNAME
+              value: {{ .Values.dnsStub.targetTailnetHostname | quote }}
+            - name: TAILSCALE_OAUTH_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: dns-stub-ts-client
+                  key: client_id
+            - name: TAILSCALE_OAUTH_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: dns-stub-ts-client
+                  key: client_secret
+

@@ -1,3 +1,0 @@
-oci_registry: 
-  cname: oci-registry.pi.home
-  tlsSecretName: oci-registry-tls

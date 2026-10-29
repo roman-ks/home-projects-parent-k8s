@@ -1,0 +1,38 @@
+# ---------------------------------------------------------------------------
+# PKI (PKI policy) — internal CA ClusterIssuer + self-signed issuer
+# ---------------------------------------------------------------------------
+# This chart creates:
+#   - A CA-type ClusterIssuer ("internal-ca") that uses the intermediate CA
+#   - A self-signed ClusterIssuer ("selfsigned") for standalone keypairs
+#   - The intermediate-ca secret (kubernetes.io/tls) in cert-manager namespace
+#
+# The intermediate-ca secret is encrypted in charts/pki/secret.enc.yaml
+# and decrypted by helm-secrets during deployment.
+#
+# ---------------------------------------------------------------------------
+issuer:
+  # ClusterIssuer name apps reference via the
+  # `cert-manager.io/cluster-issuer` ingress annotation.
+  name: internal-ca
+  # Secret in cert-manager's namespace holding the intermediate cert(+chain) and
+  # key. Created (encrypted) in charts/pki/secret.enc.yaml — encrypted with SOPS.
+  caSecretName: intermediate-ca
+
+# Self-signed issuer for keypairs outside the CA chain (e.g. OIDC token signing).
+selfSignedIssuer:
+  name: selfsigned
+
+# ---------------------------------------------------------------------------
+# Helm-secrets injected values (decrypted from charts/pki/secret.enc.yaml)
+# ---------------------------------------------------------------------------
+# These values are injected by helm-secrets from the encrypted secret.enc.yaml
+# file. Do NOT modify these directly — update secret.enc.yaml and re-encrypt.
+# ---------------------------------------------------------------------------
+# certificate: |
+#   -----BEGIN CERTIFICATE-----
+#   ...
+#   -----END CERTIFICATE-----
+# key: |
+#   -----BEGIN PRIVATE KEY-----
+#   ...
+#   -----END PRIVATE KEY-----

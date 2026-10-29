@@ -1,8 +1,12 @@
 apiVersion: v2
-name: pki
+name: cert-manager
 description: >-
   Internal PKI policy: a cert-manager CA ClusterIssuer backed by an intermediate
   CA (for *.DOMAIN). The offline root signs the intermediate; only the
   intermediate lives in-cluster and signs every app leaf certificate.
+dependencies:
+  - name: cert-manager
+    version: v1.21.0
+    repository: oci://quay.io/jetstack/charts
 type: application
 version: 0.1.0

@@ -22,6 +22,9 @@ metadata:
     # sense for an HTTPS Ingress — see charts/memos/templates/tailscale-ingress.yaml
     # for the same fix and why it's needed.
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    # This ingress never gets loadbalancer ip/host so argocd treats it as creating. 
+    # Disable healtchech to not wait for ip which will never be present
+    argocd.argoproj.io/ignore-healthcheck: "true"
 spec:
   ingressClassName: traefik-tailnet
   tls:
