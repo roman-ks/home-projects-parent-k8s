@@ -31,7 +31,7 @@ spec:
               githubConfigUrl: '{{.repoUrl}}'
         path: charts/gha-runner-set
         repoURL: https://github.com/roman-ks/home-projects-parent-k8s.git
-        targetRevision: main
+        targetRevision: sdm-bootstrap
       syncPolicy:
         automated:
           enabled: true

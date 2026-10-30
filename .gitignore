@@ -4,3 +4,6 @@
 values/*secret*.yaml
 bootstrap.yaml
 *.tgz
+
+my.plugins
+my.plugins.*
