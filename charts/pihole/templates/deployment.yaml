@@ -42,7 +42,7 @@ spec:
         - name: FTLCONF_dns_hostRecord
           value: {{ .Values.pihole.hostname }},{{ .Values.pihole.ipAddress }}
         - name: FTLCONF_dns_cnameRecords
-          value: "oci-registry.pi.home,pi.home"
+          value: {{ .Values.pihole.cnameRecrords }}
         - name: FTLCONF_dns_hosts
           value: {{ .Values.pihole.hosts | join " " }}
         - name: BLOCKLIST
