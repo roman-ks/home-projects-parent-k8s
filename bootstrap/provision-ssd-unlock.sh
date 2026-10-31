@@ -64,6 +64,12 @@ FS="$(blkid -s TYPE -o value "/dev/mapper/$MAPPER")"
 
 # Cleanup happens automatically on exit.
 
+# sdm cryptroot plugin sets luks.crypttab=no, which makes systemd ignore /etc/crypttab.
+CMDLINE="/boot/firmware/cmdline.txt"
+if [[ -f "$CMDLINE" ]]; then
+    sed -i -E 's/[[:space:]]*luks\.crypttab=no//' "$CMDLINE"
+fi
+
 # Configure automatic unlocking.
 sed -i "\|^${MAPPER}[[:space:]]|d" "$CRYPTTAB"
 echo "$MAPPER UUID=$UUID $KEY luks,nofail" >> "$CRYPTTAB"
