@@ -8,7 +8,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 apt-get update
 apt-get -y upgrade
-apt-get -y install cryptsetup systemd-cryptsetup
+apt-get -y install cryptsetup systemd-cryptsetup btop
 
 #--- Install K3s
 curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="v1.36.1+k3s1" sh -
