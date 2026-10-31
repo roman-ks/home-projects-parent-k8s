@@ -5,3 +5,5 @@ metadata:
 provisioner: {{ .Values.localPathProvisioner.provisionerName }}
 reclaimPolicy: {{ .Values.localPathProvisioner.reclaimPolicy }}
 volumeBindingMode: WaitForFirstConsumer
+parameters:
+  pathPattern: {{ .Values.localPathProvisioner.pathPattern | quote }}
