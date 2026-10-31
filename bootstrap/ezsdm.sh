@@ -52,7 +52,7 @@ mkdir:dir=/etc/sdm/assets/defer-plugin
 # Create directory for k3s configs
 copydir:"from=$assets/var/|to=/var"
 mkdir:dir=/etc/rancher/k3s/
-copyfile:"from=$assets/etc/rancher/k3s/registries.yaml|to=/etc/rancher/k3s/"
+copydir:"from=$assets/etc/rancher/k3s/|to=/etc/rancher/k3s"
 mkdir:"dir=/etc/rancher/k3s/certs"
 copyfile:"from=$root_ca_crt|to=/etc/rancher/k3s/certs/"
 
