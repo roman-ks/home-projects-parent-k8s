@@ -127,6 +127,11 @@ repoServer:
       - 1.0.0.1
 
 dex:
+  # Dex exits when its OIDC connector can't resolve auth.pi.home, but the argocd
+  # wrapper keeps the container alive. The probe makes kubelet restart it until DNS works.
+  livenessProbe:
+    enabled: true
+    periodSeconds: 20
   env:
     - name: SSL_CERT_DIR
       value: /etc/ssl/certs
