@@ -62,6 +62,10 @@ copyfile:"from=$assets/provision-ssd-unlock.sh|to=/usr/local/sbin/"
 mkdir:dir=/etc/systemd/journald.conf.d/
 copydir:"from=$assets/etc/systemd/|to=/etc/systemd"
 
+# Restart CoreDNS when NetworkManager gets new DNS servers
+mkdir:dir=/etc/NetworkManager/dispatcher.d/
+copydir:"from=$assets/etc/NetworkManager/|to=/etc/NetworkManager"
+
  
 EOF
     ) | bash -c "cat >>$assets/my.plugins"

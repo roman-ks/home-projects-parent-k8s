@@ -27,6 +27,9 @@ done
 echo "k3s is ready (/readyz = ok)"
 
 
+chown root:root /etc/NetworkManager/dispatcher.d/90-restart-coredns
+chmod 755 /etc/NetworkManager/dispatcher.d/90-restart-coredns
+
 mkdir -p /var/log/journal
 systemd-tmpfiles --create --prefix /var/log/journal
 systemctl restart systemd-journald
