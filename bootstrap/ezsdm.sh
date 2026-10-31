@@ -56,6 +56,12 @@ copyfile:"from=$assets/etc/rancher/k3s/registries.yaml|to=/etc/rancher/k3s/"
 mkdir:"dir=/etc/rancher/k3s/certs"
 copyfile:"from=$root_ca_crt|to=/etc/rancher/k3s/certs/"
 
+# Copy SSD unlock config script
+copyfile:"from=$assets/provision-ssd-unlock.sh|to=/usr/local/sbin/"
+
+mkdir:dir=/etc/systemd/journald.conf.d/
+copydir:"from=$assets/etc/systemd/|to=/etc/systemd"
+
  
 EOF
     ) | bash -c "cat >>$assets/my.plugins"

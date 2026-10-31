@@ -8,6 +8,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 apt-get update
 apt-get -y upgrade
+apt-get -y install cryptsetup systemd-cryptsetup
 
 #--- Install K3s
 curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="v1.36.1+k3s1" sh -
@@ -24,5 +25,10 @@ until [ "$(k3s kubectl get --raw='/readyz' 2>/dev/null)" = "ok" ]; do
   sleep 3
 done
 echo "k3s is ready (/readyz = ok)"
+
+
+udo mkdir -p /var/log/journal
+sudo systemd-tmpfiles --create --prefix /var/log/journal
+sudo systemctl restart systemd-journald
 
 echo "=== Provisioning completed: $(date --iso-8601=seconds) ==="
