@@ -3,6 +3,6 @@ mirrors:
     endpoint:
       - "https://oci-registry.pi.home"
 configs:
-  "${REGISTRY}":
+  "oci-registry.pi.home":
     tls:
       ca_file: /etc/rancher/k3s/certs/rootCA.crt
