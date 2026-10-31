@@ -11,7 +11,7 @@ apt-get -y upgrade
 apt-get -y install cryptsetup systemd-cryptsetup
 
 #--- Install K3s
-curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="v1.37.1+k3s1" sh -
+curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="v1.36.1+k3s1" sh -
 
 # The apiserver isn't ready the instant the installer returns — poll /readyz.
 echo "Waiting for node readiness..."
@@ -27,8 +27,8 @@ done
 echo "k3s is ready (/readyz = ok)"
 
 
-udo mkdir -p /var/log/journal
-sudo systemd-tmpfiles --create --prefix /var/log/journal
-sudo systemctl restart systemd-journald
+mkdir -p /var/log/journal
+systemd-tmpfiles --create --prefix /var/log/journal
+systemctl restart systemd-journald
 
 echo "=== Provisioning completed: $(date --iso-8601=seconds) ==="
