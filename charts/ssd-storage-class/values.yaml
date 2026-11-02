@@ -12,6 +12,6 @@ localPathProvisioner:
   provisionerName: cluster.local/encrypted-local-path
   reclaimPolicy: Retain
   # Pinned to the version already running in-cluster.
-  image: rancher/local-path-provisioner:v0.0.36
+  image: rancher/local-path-provisioner:v0.0.37
   helperImage: busybox
   pathPattern: '{{ .PVC.Namespace }}/{{ .PVC.Name }}/'
