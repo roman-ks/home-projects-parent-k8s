@@ -9,5 +9,7 @@
       "matchPackageNames": ["oci-registry.pi.home/**"],
       "enabled": false
     }
-  ]
+  ],
+  "timezone": "Europe/Kyiv",
+  "schedule": ["* * * * 5-7"]
 }
