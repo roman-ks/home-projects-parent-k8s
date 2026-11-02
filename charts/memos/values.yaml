@@ -1,6 +1,6 @@
 image:
   repository: neosmemo/memos
-  tag: 0.31.0
+  tag: 26.11.0
   pullPolicy: IfNotPresent
 
 # Public hostname. Used for the ingress host and MEMOS_INSTANCE_URL.
