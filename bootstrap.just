@@ -4,49 +4,6 @@
 
 set dotenv-load := true
 
-# Enable the memory cgroup in cmdline.txt and reboot the node.
-cgroups:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    source bootstrap/lib.sh
-    ssh-keygen -R "$SSH_TARGET"  # remove any old host key so we can connect after reboot
-    echo "Enabling cgroups on $SSH_TARGET (node will reboot)..."
-    ssh "${SSH_OPTS[@]}" "$SSH_TARGET" 'sudo bash -s' < bootstrap/cgroups.sh
-
-# Install cryptsetup (needed to unlock the encrypted drive).
-cryptsetup:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    source bootstrap/lib.sh
-    echo "Installing cryptsetup on $SSH_TARGET..."
-    ssh "${SSH_OPTS[@]}" "$SSH_TARGET" 'sudo apt-get update && sudo apt-get install -y cryptsetup'
-
-# Unlock + mount the LUKS drive (interactive passphrase, never persisted; idempotent).
-unlock:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    source bootstrap/lib.sh
-    : "${LUKS_DEVICE:?luks_device missing in bootstrap.yaml}"
-    : "${LUKS_NAME:?luks_name missing in bootstrap.yaml}"
-    : "${MOUNT_POINT:?mount_point missing in bootstrap.yaml}"
-    echo "Unlocking $LUKS_DEVICE on $SSH_TARGET (you'll be prompted for the LUKS passphrase)..."
-    # -t allocates a TTY so cryptsetup can prompt on your terminal. stdin is NOT
-    # redirected, so the passphrase is typed live and never touches disk/history.
-    ssh -t "${SSH_OPTS[@]}" "$SSH_TARGET" "
-        set -e
-        if sudo cryptsetup status $LUKS_NAME >/dev/null 2>&1; then
-            echo 'already unlocked'
-        else
-            sudo cryptsetup luksOpen $LUKS_DEVICE $LUKS_NAME
-        fi
-        sudo mkdir -p $MOUNT_POINT
-        if mountpoint -q $MOUNT_POINT; then
-            echo 'already mounted'
-        else
-            sudo mount /dev/mapper/$LUKS_NAME $MOUNT_POINT
-        fi
-        echo \"drive ready at $MOUNT_POINT\"
-    "
 
 # Create the PV dir + the static local-volume subdirs on the encrypted drive
 # (run `unlock` first). encrypted-local-path (dynamic) provisions under $dir/;
@@ -69,30 +26,6 @@ pv-dir:
         echo 'PV dirs:'; ls -ld '$dir' \"$dir\"/*/
     "
 
-# Write k3s config.yaml, registries.yaml and the root CA to the node.
-k3s-config:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    source bootstrap/lib.sh
-    : "${PARENT:?parent missing in bootstrap.yaml}"
-    : "${REGISTRY:?registry_cname missing in bootstrap.yaml}"
-    : "${MOUNT_POINT:?mount_point missing in bootstrap.yaml}"
-    : "${ROOTCA:?rootCA missing in bootstrap.yaml}"
-    [ -f "$ROOTCA" ] || { echo "ERROR: local rootCA not found: $ROOTCA" >&2; exit 1; }
-    rootca_b64=$(base64 -w0 "$ROOTCA")
-    echo "Writing k3s config to $SSH_TARGET..."
-    ssh "${SSH_OPTS[@]}" "$SSH_TARGET" \
-        "sudo bash -s -- '$PARENT' '$REGISTRY' '$rootca_b64' '$MOUNT_POINT'" < bootstrap/k3s-config.sh
-
-# Install pinned k3s and wait for the node to be ready.
-k3s:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    source bootstrap/lib.sh
-    : "${K3S_VERSION:?k3s_version missing in bootstrap.yaml}"
-    echo "Installing k3s $K3S_VERSION on $SSH_TARGET..."
-    ssh "${SSH_OPTS[@]}" "$SSH_TARGET" \
-        "sudo bash -s -- '$K3S_VERSION'" < bootstrap/k3s-install.sh
 
 # Fetch the node's kubeconfig to ~/.kube/config, repointed at the node IP.
 k3s-kubeconfig:
@@ -122,22 +55,6 @@ k3s-kubeconfig:
     echo "Wrote $dest (server -> https://${HOST}:6443)"
     echo "Verifying..."
     kubectl get pods -n kube-system
-
-# Sync k3s' auto-apply manifests (traefik HelmChartConfig + the authentik
-# forwardAuth Middleware) into the node's server/manifests dir. k3s reconciles
-# them automatically. Add a *.yaml under k3s/server/manifests/ and re-run.
-traefik:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    source bootstrap/lib.sh
-    srcdir="k3s/server/manifests"
-    destdir="/var/lib/rancher/k3s/server/manifests"
-    ls "$srcdir"/*.yaml >/dev/null 2>&1 || { echo "ERROR: no manifests in $srcdir" >&2; exit 1; }
-    echo "Syncing $srcdir/*.yaml -> $SSH_TARGET:$destdir ..."
-    # One ssh session: stream a tar of the manifests dir and extract it as root.
-    tar -C "$srcdir" -cf - . | ssh "${SSH_OPTS[@]}" "$SSH_TARGET" \
-        "sudo mkdir -p '$destdir' && sudo tar -C '$destdir' -xf -"
-    echo "Synced $(ls "$srcdir"/*.yaml | wc -l) manifest(s) — k3s will reconcile shortly."
 
 # Generate an intermediate CA (signed by the offline root) and load it into
 # cert-manager as the `intermediate-ca` secret, so the `internal-ca` ClusterIssuer

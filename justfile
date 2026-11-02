@@ -6,11 +6,6 @@ mod bootstrap
 default:
     just --list
 
-
-core:
-    helm upgrade --install core ./charts/core \
-        --namespace kube-system
-
 # Scale a target's UI server up (default 1) or down (0). Scale down when done —
 # a running server polls S3 (billed).
 #   just kopia-ui immich      # up

@@ -83,8 +83,13 @@ echo $"
 Use sdm to burn the disk and create SSH Host Keys:
 sdm --ddsw "bs=16M" --burn /dev/sdX --hostname raspberrypi \"$work_img\" --expand-root \\
     --plugin sshhostkey:generate-keys \\
+    --plugin cryptroot:\"authkeys=/home/roman/.ssh/authorized_keys|ssh|crypto=xchacha\" \\
     --plugin defer-plugin:\"defer-command:/usr/local/sbin/provision.sh\"
 
 Once in Dropbear use:
 sdmcryptfs /dev/mmcblk0 RAM
+
+Once rootfs encrypted run:
+/usr/local/sbin/provision-ssd-unlock.sh 
+This will set up unlocking of ssd on boot.
 "

@@ -12,7 +12,7 @@ spec:
   source:
     path: charts/oci-registry
     repoURL: https://github.com/roman-ks/home-projects-parent-k8s.git
-    targetRevision: sdm-bootstrap
+    targetRevision: main
   syncPolicy:
     automated:
       enabled: true
