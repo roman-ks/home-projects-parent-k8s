@@ -1,6 +1,6 @@
 oci_registry: 
   cname: oci-registry.pi.home
   tlsSecretName: oci-registry-tls
-  pvHostPath: "/mnt/pv/oci-registry"
+  pvHostPath: "/mnt/drive1/pv/oci-registry"
   # cert-manager issues + auto-renews the tlsSecretName above from this ClusterIssuer.
   clusterIssuer: internal-ca

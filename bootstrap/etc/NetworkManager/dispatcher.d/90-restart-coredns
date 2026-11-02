@@ -1,0 +1,13 @@
+#!/bin/bash
+# CoreDNS gets a one-time copy of the host resolv.conf when its pod starts,
+# so restart it whenever NetworkManager reports new DHCP/DNS settings.
+case "$2" in
+  up|dhcp4-change|dhcp6-change) ;;
+  *) exit 0 ;;
+esac
+
+[ -x /usr/local/bin/k3s ] || exit 0
+systemctl is-active --quiet k3s || exit 0
+
+systemd-run --quiet --no-block --unit=coredns-restart --collect \
+  /bin/bash -c 'sleep 3; /usr/local/bin/k3s kubectl -n kube-system rollout restart deploy/coredns' || true

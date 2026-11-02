@@ -10,7 +10,8 @@ localPathProvisioner:
   # Provisioner id — must be unique and differ from k3s's `rancher.io/local-path`
   # so the two instances don't fight over the same PVCs.
   provisionerName: cluster.local/encrypted-local-path
-  reclaimPolicy: Delete
+  reclaimPolicy: Retain
   # Pinned to the version already running in-cluster.
   image: rancher/local-path-provisioner:v0.0.36
   helperImage: busybox
+  pathPattern: '{{ .PVC.Namespace }}/{{ .PVC.Name }}/'

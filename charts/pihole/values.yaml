@@ -2,6 +2,7 @@ pihole:
   hostname: pi.home
   ipAddress: 192.168.50.155
   cname: pihole.pi.home
+  cnameRecrords: "oci-registry.pi.home,pi.home;argocd.pi.home,pi.home;auth.pi.home,pi.home;"
   tlsSecretName: "pihole-tls"
   hosts: 
     - "192.168.50.100 ml.immich.pi.home"
