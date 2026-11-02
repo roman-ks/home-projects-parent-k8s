@@ -1,4 +1,8 @@
 pihole:
+  image:
+    repository: pihole/pihole
+    tag: 2025.11.0
+
   hostname: pi.home
   ipAddress: 192.168.50.155
   cname: pihole.pi.home
