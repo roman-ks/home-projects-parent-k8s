@@ -7,8 +7,10 @@ spec:
     namespace: k8s-upgrader
     server: https://kubernetes.default.svc
   project: default
-  sources:
-    - repoURL: https://github.com/rancher/system-upgrade-controller/releases/download/v0.21.0/crd.yaml
+  source:
+    path: charts/k3s-upgrade-controller
+    repoURL: https://github.com/roman-ks/home-projects-parent-k8s.git
+    targetRevision: k3s-upgrade-controller
   syncPolicy:
     automated:
       enabled: true
