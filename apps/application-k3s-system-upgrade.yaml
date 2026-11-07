@@ -10,7 +10,7 @@ spec:
   source:
     path: charts/k3s-system-upgrade
     repoURL: https://github.com/roman-ks/home-projects-parent-k8s.git
-    targetRevision: k3s-upgrade-controller
+    targetRevision: main
   syncPolicy:
     automated:
       enabled: true
