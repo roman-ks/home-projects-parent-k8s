@@ -1,13 +1,13 @@
-{{- $vols := dict
-  "immich-upload"   .Values.storage.upload
-  "immich-external" .Values.storage.external
-  .Values.postgres.storage.name .Values.postgres.storage -}}
-{{- range $name, $cfg := $vols }}
+{{- $vols := list
+  .Values.storage.upload
+  .Values.storage.external
+  .Values.postgres.storage -}}
+{{- range $cfg := $vols }}
 ---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ $name }}
+  name: {{ $cfg.name }}
   labels:
     app: immich
   annotations:
@@ -35,12 +35,12 @@ spec:
                 - {{ $.Values.nodeName }}
   claimRef:
     namespace: {{ $.Release.Namespace }}
-    name: {{ $name }}
+    name: {{ $cfg.name }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ $name }}
+  name: {{ $cfg.name }}
   labels:
     app: immich
   annotations:
@@ -49,7 +49,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   storageClassName: ""
-  volumeName: {{ $name }}
+  volumeName: {{ $cfg.name }}
   resources:
     requests:
       storage: {{ $cfg.size }}

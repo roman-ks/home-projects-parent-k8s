@@ -19,11 +19,13 @@ postgres:
 storage:
   # Immich's own upload/library dir (mounted at /data). Writer.
   upload:
+    name: "immich-upload"
     path: /mnt/drive1/pv/immich-upload
     size: 500Gi
   # External library — SAME path as the samba `imuser` share. Immich only READS
   # it, so it's mounted read-only (samba is the sole writer).
   external:
+    name: "immich-external"
     path: /mnt/drive1/pv/immich-external
     size: 500Gi
 

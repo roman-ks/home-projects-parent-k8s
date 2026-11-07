@@ -16,6 +16,11 @@ spec:
           storage:
             name: immich-old-postgres
             path: /mnt/drive1/pv/immich-old-postgres
+        storage:
+          upload:
+            name: immich-old-upload
+          external:
+            name: immich-old-external
         immich:
           controllers:
             main:
