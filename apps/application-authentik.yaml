@@ -15,7 +15,7 @@ spec:
         - secrets://secret.enc.yaml
     path: charts/authentik-wrapper
     repoURL: https://github.com/roman-ks/home-projects-parent-k8s.git
-    targetRevision: main
+    targetRevision: immich-fix
   syncPolicy:
     automated:
       enabled: true
