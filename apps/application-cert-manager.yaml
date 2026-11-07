@@ -15,7 +15,7 @@ spec:
         - secrets://secret.enc.yaml
     path: charts/cert-manager
     repoURL: https://github.com/roman-ks/home-projects-parent-k8s.git
-    targetRevision: main
+    targetRevision: immich-old
   syncPolicy:
     automated:
       enabled: true
