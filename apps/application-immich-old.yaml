@@ -45,7 +45,7 @@ spec:
                     hosts:
                       - immich-old.pi.home
 
-          mmich:
+          immich:
             configuration:
               oauth:
                 issuerUrl: https://auth.pi.home/application/o/oidc-immich-old/.well-known/openid-configuration
@@ -53,7 +53,7 @@ spec:
                 externalDomain: https://immich-old.pi.home
     path: charts/immich-wrapper
     repoURL: https://github.com/roman-ks/home-projects-parent-k8s.git
-    targetRevision: main
+    targetRevision: immich-fix
   syncPolicy:
     automated:
       enabled: true
