@@ -1,14 +1,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: k8s-upgrader
+  name: k3s-system-upgrade
 spec:
   destination:
-    namespace: k8s-upgrader
+    namespace: system-upgrade
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: charts/k3s-upgrade-controller
+    path: charts/k3s-system-upgrade
     repoURL: https://github.com/roman-ks/home-projects-parent-k8s.git
     targetRevision: k3s-upgrade-controller
   syncPolicy:

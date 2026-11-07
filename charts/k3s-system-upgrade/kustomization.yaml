@@ -4,4 +4,5 @@ kind: Kustomization
 resources:
   - https://github.com/rancher/system-upgrade-controller/releases/download/v0.21.0/crd.yaml
   - https://github.com/rancher/system-upgrade-controller/releases/download/v0.21.0/system-upgrade-controller.yaml
+  - plan.yaml
 
