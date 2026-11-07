@@ -44,13 +44,18 @@ spec:
                   - secretName: immich-tls
                     hosts:
                       - immich-old.pi.home
-
+            persistence:
+              external:
+                existingClaim: "immich-old-external"
           immich:
             configuration:
               oauth:
                 issuerUrl: https://auth.pi.home/application/o/oidc-immich-old/.well-known/openid-configuration
               server:
                 externalDomain: https://immich-old.pi.home
+            persistence:
+              library:
+                existingClaim: "immich-old-upload"
     path: charts/immich-wrapper
     repoURL: https://github.com/roman-ks/home-projects-parent-k8s.git
     targetRevision: immich-fix
