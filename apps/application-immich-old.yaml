@@ -14,6 +14,7 @@ spec:
       valuesObject:
         postgres:
           storage:
+            name: immich-old-postgres
             path: /mnt/drive1/pv/immich-old-postgres
         immich:
           controllers:

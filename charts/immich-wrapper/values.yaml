@@ -12,6 +12,7 @@ postgres:
   # password is supplied at deploy from values/immich-config.enc.yaml (-> immich-db secret)
   secretName: immich-db
   storage:
+    name: "immich-postgres"
     path: /mnt/drive1/pv/immich-postgres
     size: 20Gi
 

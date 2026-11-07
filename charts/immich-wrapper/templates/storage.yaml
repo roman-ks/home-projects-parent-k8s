@@ -1,7 +1,7 @@
 {{- $vols := dict
   "immich-upload"   .Values.storage.upload
   "immich-external" .Values.storage.external
-  "immich-postgres" .Values.postgres.storage -}}
+  .Values.postgres.storage.name .Values.postgres.storage -}}
 {{- range $name, $cfg := $vols }}
 ---
 apiVersion: v1
