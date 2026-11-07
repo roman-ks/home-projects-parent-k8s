@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: k3s-system-upgrade
+spec:
+  destination:
+    namespace: system-upgrade
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: charts/k3s-system-upgrade
+    repoURL: https://github.com/roman-ks/home-projects-parent-k8s.git
+    targetRevision: main
+  syncPolicy:
+    automated:
+      enabled: true
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

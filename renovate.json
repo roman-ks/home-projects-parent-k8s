@@ -11,5 +11,19 @@
     }
   ],
   "timezone": "Europe/Kyiv",
-  "schedule": ["* * * * 5-7"]
+  "schedule": ["* * * * 5-7"],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "charts/k3s-system-upgrade/plan\\.yaml$/"
+      ],
+      "matchStrings": [
+        "version:\\s*(?<currentValue>v\\d+\\.\\d+\\.\\d+\\+k3s\\d+)"
+      ],
+      "depNameTemplate": "rancher/k3s",
+      "datasourceTemplate": "github-releases",
+      "versioningTemplate": "loose"
+    }
+  ]
 }
