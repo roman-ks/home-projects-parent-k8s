@@ -23,7 +23,23 @@ spec:
                   image:
                     repository: ghcr.io/immich-app/immich-server
                     tag: v3.1.0
-          immich:
+          server:
+            ingress:
+              main:
+                hosts:
+                - host: immich-old.pi.home
+                  paths:
+                    - path: /
+                      pathType: Prefix
+                      service:
+                        identifier: main
+                        port: 2283
+                tls:
+                  - secretName: immich-tls
+                    hosts:
+                      - immich-old.pi.home
+
+          mmich:
             configuration:
               oauth:
                 issuerUrl: https://auth.pi.home/application/o/oidc-immich-old/.well-known/openid-configuration
