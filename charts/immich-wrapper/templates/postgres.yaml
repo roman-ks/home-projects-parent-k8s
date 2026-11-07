@@ -61,7 +61,7 @@ spec:
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: immich-postgres
+            claimName: {{ .Values.postgres.storage.name }}
         - name: shm
           emptyDir:
             medium: Memory
