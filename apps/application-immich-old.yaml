@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: immich
+  name: immich-old
 spec:
   destination:
     namespace: immich-old
@@ -12,6 +12,9 @@ spec:
       valueFiles:
         - secrets://secret.enc.yaml
       valuesObject:
+        postgres:
+          storage:
+            path: /mnt/drive1/pv/immich-old-postgres
         immich:
           controllers:
             main:
