@@ -18,9 +18,11 @@ spec:
         immich:
           controllers:
             main:
-              image:
-                repository: ghcr.io/immich-app/immich-server
-                tag: v3.1.0
+              containers:
+                main:
+                  image:
+                    repository: ghcr.io/immich-app/immich-server
+                    tag: v3.1.0
           immich:
             configuration:
               oauth:
