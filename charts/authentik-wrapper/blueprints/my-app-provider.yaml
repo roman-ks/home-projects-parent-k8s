@@ -34,7 +34,7 @@ entries:
       authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
       invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
       issuer_mode: global
-      client_id: !Env OAUTH_IMMICH_CLIENT_ID
+      client_id: immich-old-test
       client_secret: !Env OAUTH_IMMICH_CLIENT_SECRET
       grant_types:
         - authorization_code

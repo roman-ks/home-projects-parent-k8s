@@ -53,6 +53,7 @@ spec:
             configuration:
               oauth:
                 issuerUrl: https://auth.pi.home/application/o/oidc-immich-old/.well-known/openid-configuration
+                clientId: immich-old-test
               server:
                 externalDomain: https://immich-old.pi.home
             persistence:
