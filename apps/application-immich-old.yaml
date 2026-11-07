@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: immich
+spec:
+  destination:
+    namespace: immich-old
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    helm:
+      valueFiles:
+        - secrets://secret.enc.yaml
+      valuesObject:
+        immich:
+          controllers:
+            main:
+              image:
+                tag: v3.1.0
+          immich:
+            configuration:
+              oauth:
+                issuerUrl: https://auth.pi.home/application/o/oidc-immich-old/.well-known/openid-configuration
+              server:
+                externalDomain: https://immich-old.pi.home
+    path: charts/immich-wrapper
+    repoURL: https://github.com/roman-ks/home-projects-parent-k8s.git
+    targetRevision: main
+  syncPolicy:
+    automated:
+      enabled: true
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
