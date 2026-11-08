@@ -1,4 +1,4 @@
 pihole_controller:
   image:
     repository: "oci-registry.pi.home/pihole-controller"
-    tag: "4042c950a745e8b95bcb61166489a2231e4b52c5"
+    tag: "17fb2d30a1b5ff4a76cc50cc1e4b84293a3faec8"

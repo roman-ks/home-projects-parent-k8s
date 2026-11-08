@@ -1,7 +1,8 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
+    "config:recommended",
+    "workarounds:k3sKubernetesVersioning"
   ],
   "packageRules": [
     {
@@ -16,14 +17,27 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "charts/k3s-system-upgrade/plan\\.yaml$/"
+        "/^charts\\/k3s-system-upgrade\\/plan\\.yaml$/"
       ],
       "matchStrings": [
         "version:\\s*(?<currentValue>v\\d+\\.\\d+\\.\\d+\\+k3s\\d+)"
       ],
-      "depNameTemplate": "rancher/k3s",
+      "depNameTemplate": "k3s-io/k3s",
+      "packageNameTemplate": "k3s-io/k3s",
+      "datasourceTemplate": "github-releases"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^charts\\/k3s-system-upgrade\\/kustomization\\.yaml$/"
+      ],
+      "matchStrings": [
+        "https://github\\.com/rancher/system-upgrade-controller/releases/download/(?<currentValue>v\\d+\\.\\d+\\.\\d+)/"
+      ],
+      "depNameTemplate": "rancher/system-upgrade-controller",
+      "packageNameTemplate": "rancher/system-upgrade-controller",
       "datasourceTemplate": "github-releases",
-      "versioningTemplate": "loose"
+      "versioningTemplate": "semver"
     }
   ]
 }
