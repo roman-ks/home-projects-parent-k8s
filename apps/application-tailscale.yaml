@@ -12,6 +12,9 @@ spec:
       valueFiles:
         - gitops-values.yaml
         - secrets://secret.enc.yaml
+      # prevent traefik from installing CRDs, have system traefik own all CRDs. 
+      # Has no effect on tailscale at it has CRDs in template/ folder 
+      skipCrds: true
     path: charts/tailscale-operator-wrapper
     repoURL: https://github.com/roman-ks/home-projects-parent-k8s.git
     targetRevision: main
