@@ -1,9 +1,9 @@
 dependencies:
 - name: tailscale-operator
   repository: https://pkgs.tailscale.com/helmcharts
-  version: 1.104.4
+  version: 1.104.7
 - name: traefik
   repository: https://traefik.github.io/charts
   version: 42.2.0
-digest: sha256:2d844c2d6c9c5308592390b1b8997869e016c9e4824acce1c871176488b0fc53
-generated: "2026-11-02T18:45:32.898472102Z"
+digest: sha256:9d33e4a7caae38c0617fc647fa65137ba9bf815c0f55cefed83c5c8179a04f55
+generated: "2026-11-12T23:43:42.766637452Z"
