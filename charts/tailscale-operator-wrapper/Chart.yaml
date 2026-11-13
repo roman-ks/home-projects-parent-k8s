@@ -15,5 +15,5 @@ dependencies:
     # (raw TCP) through one shared tailnet address instead of a proxy per
     # service.
   - name: traefik
-    version: "42.2.0"
+    version: "42.4.0"
     repository: https://traefik.github.io/charts
