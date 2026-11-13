@@ -44,7 +44,7 @@ immich:
         main:
           image:
             repository: ghcr.io/immich-app/immich-server
-            tag: v3.3.6
+            tag: v3.4.1
           env:
             DB_HOSTNAME: immich-postgres
             DB_USERNAME: immich
