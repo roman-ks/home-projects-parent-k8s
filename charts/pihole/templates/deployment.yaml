@@ -37,6 +37,8 @@ spec:
           value: "Europe/Kyiv"
         - name: FTLCONF_webserver_api_password
           value: ""
+        - name: FTCONF_webserver_domain
+          value: {{ .Values.pihole.cname }}
         - name: FTLCONF_dns_listeningMode
           value: "SINGLE"
         - name: FTLCONF_dns_hostRecord
