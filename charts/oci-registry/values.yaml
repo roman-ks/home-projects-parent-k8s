@@ -1,4 +1,7 @@
 oci_registry: 
+  image:
+    repository: registry
+    tag: 2
   cname: oci-registry.pi.home
   tlsSecretName: oci-registry-tls
   pvHostPath: "/mnt/drive1/pv/oci-registry"
