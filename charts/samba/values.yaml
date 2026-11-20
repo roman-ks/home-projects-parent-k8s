@@ -1,6 +1,6 @@
 image:
   repository: ghcr.io/servercontainers/samba
-  tag: smbd-only-a3.24.4-s4.23.8-r0
+  tag: smbd-only-a3.24.3-s4.23.8-r0
   pullPolicy: IfNotPresent
 
 # LoadBalancer exposes SMB on the LAN via k3s servicelb (reachable at <node-ip>:445).
