@@ -13,7 +13,8 @@
     {
       "matchDatasources": ["docker"],
       "matchPackageNames": ["ghcr.io/servercontainers/samba"],
-      "versioning": "regex:\\s*smbd-only-a(?<major>\\d+)(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?-s(?<build>\\d+)(\\.(?<revision>\\d+))?(\\.(?<prerelease>\\d+))?-.*"
+      "versioning": "regex:\\s*smbd-only-a(?<major>\\d+)(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?-s(?<build>\\d+)(\\.(?<revision>\\d+))?(\\.(?<prerelease>\\d+))?-.*",
+      "ignoreUnstable": true
     }
   ],
   "timezone": "Europe/Kyiv",
