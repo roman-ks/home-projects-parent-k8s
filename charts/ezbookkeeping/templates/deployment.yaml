@@ -19,6 +19,18 @@ spec:
         runAsUser: 1000
         runAsGroup: 1000
         fsGroup: 1000
+      initContainers:
+        - name: fix-perms
+          image: busybox
+          command:
+            - sh
+            - -c
+            - |
+              mkdir /ezbookkeeping/{data,storage}
+              chown -R 1000:1000 /ezbookkeeping/{data,storage}
+          volumeMounts:
+            - mountPath: "/ezbookkeeping/"
+            name: "ezbookkeeping-data"
       containers:
       - image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: IfNotPresent
@@ -56,8 +68,5 @@ spec:
           subpath: /storage
       volumes:
         - name: "ezbookkeeping-data"
-          persistentVolumeClaim:
-            claimName: "ezbookkeeping-data"
-        - name: "ezbookkeeping-storage"
           persistentVolumeClaim:
             claimName: "ezbookkeeping-data"
