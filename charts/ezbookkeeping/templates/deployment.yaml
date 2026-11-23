@@ -29,7 +29,7 @@ spec:
               mkdir /ezbookkeeping/{data,storage}
               chown -R 1000:1000 /ezbookkeeping/{data,storage}
           volumeMounts:
-            - mountPath: "/ezbookkeeping/"
+          - mountPath: "/ezbookkeeping/"
             name: "ezbookkeeping-data"
       containers:
       - image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
