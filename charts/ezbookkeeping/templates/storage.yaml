@@ -14,7 +14,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: {{ .Values.persistance.size }}
+      storage: {{ .Values.persistence.size }}
 
 ---
 apiVersion: v1
@@ -35,6 +35,6 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: {{ .Values.persistance.size }}
+      storage: {{ .Values.persistence.size }}
   hostPath:
     path: {{ .Values.persistence.hostPath }}
