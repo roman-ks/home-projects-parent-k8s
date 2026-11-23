@@ -27,7 +27,7 @@ spec:
     storage: {{ .Values.persistence.size }}
   accessModes:
     - ReadWriteOnce
-  persistentVolumeClaimPolicy: Retain
+  persistentVolumeReclaimPolicy: Retain
   storageClassName: {{ .Values.persistence.storageClass }}
   hostPath:
     path: {{ .Values.persistence.hostPath }}
