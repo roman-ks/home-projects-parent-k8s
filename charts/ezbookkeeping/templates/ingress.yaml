@@ -20,10 +20,10 @@ spec:
     http:
       paths:
       - path: /
-        pathType: ezbookkeeping
+        pathType: Prefix
         backend:
           service:
-            name: pihole
+            name: ezbookkeeping
             port:
               number: 80
   tls:
