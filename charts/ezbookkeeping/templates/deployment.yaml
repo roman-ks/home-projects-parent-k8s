@@ -50,8 +50,10 @@ spec:
         volumeMounts:
         - mountPath: "/ezbookkeeping/data" # SQLite database storage
           name: "ezbookkeeping-data"
+          subpath: /data
         - mountPath: "/ezbookkeeping/storage" # User uploads storage
-          name: "ezbookkeeping-storage"
+          name: "ezbookkeeping-data"
+          subpath: /storage
       volumes:
         - name: "ezbookkeeping-data"
           persistentVolumeClaim:

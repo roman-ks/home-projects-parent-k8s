@@ -1,40 +1,36 @@
----
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: "ezbookkeeping-data-pvc"
+  name: ezbookkeeping-data
   labels:
-    app: "ezbookkeeping"
+    app: ezbookkeeping
+  annotations:
+    helm.sh/resource-policy: keep
 spec:
-  storageClassName: {{ .Values.persistence.storageClass }}
-  selector:
-    matchLabels:
-      pv-for: "ezbookkeeping-data"
   accessModes:
     - ReadWriteOnce
+  storageClassName: {{ .Values.persistence.storageClass }}
   resources:
     requests:
       storage: {{ .Values.persistence.size }}
 
 ---
 apiVersion: v1
-kind: PersistentVolumeClaim
+kind: PersistentVolume
 metadata:
-  name: "ezbookkeeping-storage-pvc"
-  labels:
-    app: "ezbookkeeping"
+  name: ezbookkeeping-pv
   annotations:
     # Real data (sqlite db + assets) — never touch it on uninstall.
     helm.sh/resource-policy: keep
 spec:
-  storageClassName: {{ .Values.persistence.storageClass }}
-  selector:
-    matchLabels:
-      pv-for: "ezbookkeeping-storage"
+  capacity:
+    storage: {{ .Values.persistence.size }}
   accessModes:
     - ReadWriteOnce
-  resources:
-    requests:
-      storage: {{ .Values.persistence.size }}
+  persistentVolumeClaimPolicy: Retain
+  storageClassName: {{ .Values.persistence.storageClass }}
   hostPath:
     path: {{ .Values.persistence.hostPath }}
+  claimRef:
+    namespace: {{ .Release.Namespace }}
+    name: ezbookkeeping-data
