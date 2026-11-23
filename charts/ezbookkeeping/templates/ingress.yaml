@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ezbookkeeping
+  annotations:
+    {{- if .Values.clusterIssuer }}
+    # cert-manager mints + auto-renews the cert in .spec.tls[].secretName.
+    cert-manager.io/cluster-issuer: {{ .Values.clusterIssuer }}
+    {{- end }}
+    # authentik SSO via the shared forwardAuth middleware, same as the kopia
+    # chart. (CSP upgrade-insecure-requests is applied cluster-wide via the
+    # :websecure entrypoint default — see k3s/server/manifests/traefik-config.yaml
+    # — so it doesn't need to be listed here too.)
+    traefik.ingress.kubernetes.io/router.middlewares: {{ .Values.authMiddleware }}
+
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: {{ .Values.cname }}
+    http:
+      paths:
+      - path: /
+        pathType: ezbookkeeping
+        backend:
+          service:
+            name: pihole
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - {{ .Values.cname }}  
+    secretName: {{ .Values.tlsSecretName }}

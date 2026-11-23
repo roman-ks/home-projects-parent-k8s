@@ -1,0 +1,13 @@
+
+image:
+  repository: mayswind/ezbookkeeping
+  tag: 2.2.0
+
+cname: ezbook.pi.home
+tlsSecretName: "ezbookkeeping-tls"
+hosts: 
+  - "192.168.50.100 ml.immich.pi.home"
+# cert-manager issues + auto-renews the tlsSecretName above from this ClusterIssuer.
+clusterIssuer: internal-ca
+# authentik SSO via the shared forwardAuth middleware (see charts/kopia).
+authMiddleware: kube-system-authentik-forward-auth@kubernetescrd
