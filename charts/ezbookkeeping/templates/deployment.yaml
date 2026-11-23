@@ -21,7 +21,6 @@ spec:
           securityContext:
             runAsUser: 0
             runAsGroup: 0
-            fsGroup: 0
             allowPrivelegeEscalation: false
           command:
             - sh
@@ -42,7 +41,6 @@ spec:
           runAsNonRoot: true
           runAsUser: 1000
           runAsGroup: 1000
-          fsGroup: 1000
         name: "ezbookkeeping"
         command: ["sleep", "infinity"]
 
@@ -73,10 +71,10 @@ spec:
         volumeMounts:
         - mountPath: "/ezbookkeeping/data" # SQLite database storage
           name: "ezbookkeeping-data"
-          subpath: /data
+          subPath: /data
         - mountPath: "/ezbookkeeping/storage" # User uploads storage
           name: "ezbookkeeping-data"
-          subpath: /storage
+          subPath: /storage
       volumes:
         - name: "ezbookkeeping-data"
           persistentVolumeClaim:
