@@ -57,7 +57,7 @@ spec:
       volumes:
         - name: "ezbookkeeping-data"
           persistentVolumeClaim:
-            claimName: "ezbookkeeping-data-pvc"
+            claimName: "ezbookkeeping-data"
         - name: "ezbookkeeping-storage"
           persistentVolumeClaim:
-            claimName: "ezbookkeeping-storage-pvc"
+            claimName: "ezbookkeeping-data"
