@@ -23,7 +23,7 @@ spec:
         - name: fix-perms
           image: busybox
           command:
-            - sh
+            - bash
             - -c
             - |
               mkdir /ezbookkeeping/{data,storage}
