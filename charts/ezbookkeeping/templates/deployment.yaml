@@ -42,8 +42,6 @@ spec:
           runAsUser: 1000
           runAsGroup: 1000
         name: "ezbookkeeping"
-        command: ["sleep", "infinity"]
-
         env:
         - name: EBK_SECURITY_SECRET_KEY
           valueFrom:
@@ -53,7 +51,7 @@ spec:
         - name: EBK_SERVER_PROTOCOL
           value: "http"  # Ingress will handle HTTPS termination
         - name: EBK_SERVER_DOMAIN
-          value: "ezbookkeeping.yourdomain"
+          value: {{ .Values.cname }}
         - name: EBK_SERVER_ENABLE_GZIP
           value: "true"
         - name: EBK_LOG_MODE
