@@ -22,6 +22,11 @@ spec:
       initContainers:
         - name: fix-perms
           image: busybox
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+            fsGroup: 0
+            allowPrivelegeEscalation: false
           command:
             - sh
             - -c
