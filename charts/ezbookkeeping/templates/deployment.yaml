@@ -23,11 +23,13 @@ spec:
         - name: fix-perms
           image: busybox
           command:
-            - bash
+            - sh
             - -c
             - |
-              mkdir /ezbookkeeping/{data,storage}
-              chown -R 1000:1000 /ezbookkeeping/{data,storage}
+              mkdir /ezbookkeeping/data
+              mkdir /ezbookkeeping/storage
+              chown -R 1000:1000 /ezbookkeeping/data
+              chown -R 1000:1000 /ezbookkeeping/storage
           volumeMounts:
           - mountPath: "/ezbookkeeping/"
             name: "ezbookkeeping-data"
