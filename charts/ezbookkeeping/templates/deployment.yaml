@@ -35,6 +35,7 @@ spec:
               mkdir /ezbookkeeping/storage
               chown -R 1000:1000 /ezbookkeeping/data
               chown -R 1000:1000 /ezbookkeeping/storage
+              ls -l /ezbookkeeping
           volumeMounts:
           - mountPath: "/ezbookkeeping/"
             name: "ezbookkeeping-data"
