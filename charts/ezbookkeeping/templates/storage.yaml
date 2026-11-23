@@ -6,7 +6,7 @@ metadata:
   labels:
     app: "ezbookkeeping"
 spec:
-  storageClassName: my-storage-class
+  storageClassName: {{ .Values.persistence.storageClass }}
   selector:
     matchLabels:
       pv-for: "ezbookkeeping-data"
@@ -14,7 +14,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 9Gi
+      storage: {{ .Values.persistance.size }}
 
 ---
 apiVersion: v1
@@ -23,8 +23,11 @@ metadata:
   name: "ezbookkeeping-storage-pvc"
   labels:
     app: "ezbookkeeping"
+  annotations:
+    # Real data (sqlite db + assets) — never touch it on uninstall.
+    helm.sh/resource-policy: keep
 spec:
-  storageClassName: my-storage-class
+  storageClassName: {{ .Values.persistence.storageClass }}
   selector:
     matchLabels:
       pv-for: "ezbookkeeping-storage"
@@ -32,4 +35,6 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 9Gi
+      storage: {{ .Values.persistance.size }}
+  hostPath:
+    path: {{ .Values.persistence.hostPath }}

@@ -11,3 +11,9 @@ hosts:
 clusterIssuer: internal-ca
 # authentik SSO via the shared forwardAuth middleware (see charts/kopia).
 authMiddleware: kube-system-authentik-forward-auth@kubernetescrd
+persistence:
+  storageClass: encrypted-local-path
+  size: 9Gi
+  # Static PV (templates/persistent-volume.yaml) so kopia has a stable path to
+  # back up — dynamic provisioning would embed the PVC's UID in the dir name.
+  hostPath: /mnt/drive1/pv/ezbookkeeping
