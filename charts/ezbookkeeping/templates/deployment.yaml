@@ -42,6 +42,8 @@ spec:
       - image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: IfNotPresent
         name: "ezbookkeeping"
+        command: ["sleep", "infinity"]
+
         env:
         - name: EBK_SECURITY_SECRET_KEY
           valueFrom:
