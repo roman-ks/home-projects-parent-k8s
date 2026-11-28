@@ -78,8 +78,6 @@ spec:
           value: "true"
         - name: EBK_AUTH_OIDC_CUSTOM_DISPLAY_NAME
           value: authentik
-
-EBK_AUTH_OIDC_PROVIDER_BASE_URL=https://authentik.company/application/o/<application_slug>/
         ports:
         - containerPort: 8080
           name: ezbookkeeping
