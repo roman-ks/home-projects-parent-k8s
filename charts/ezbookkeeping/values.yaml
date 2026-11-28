@@ -5,8 +5,6 @@ image:
 
 cname: ezbook.pi.home
 tlsSecretName: "ezbookkeeping-tls"
-hosts: 
-  - "192.168.50.100 ml.immich.pi.home"
 # cert-manager issues + auto-renews the tlsSecretName above from this ClusterIssuer.
 clusterIssuer: internal-ca
 # authentik SSO via the shared forwardAuth middleware (see charts/kopia).
@@ -17,3 +15,6 @@ persistence:
   # Static PV (templates/persistent-volume.yaml) so kopia has a stable path to
   # back up — dynamic provisioning would embed the PVC's UID in the dir name.
   hostPath: /mnt/drive1/pv/ezbookkeeping
+
+oidc: 
+  providerBaseUrl: https://auth.pi.home/application/o/oidc-ezbookeeping/
