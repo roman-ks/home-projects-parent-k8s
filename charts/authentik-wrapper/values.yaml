@@ -117,3 +117,8 @@ argocd:
   oidc:
     clientId: ""
     clientSecret: ""
+
+ezbookkeeping:
+  oidc:
+    clientId: ""
+    clientSecret: ""
