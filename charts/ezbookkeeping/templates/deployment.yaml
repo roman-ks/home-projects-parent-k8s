@@ -70,8 +70,8 @@ spec:
         - name: EBK_AUTH_OAUTH2_CLIENT_SECRET
           valueFrom:
             secretKeyRef:
-            name: ezbookkeeping-secret
-            key: EBK_AUTH_OAUTH2_CLIENT_SECRET
+              name: ezbookkeeping-secret
+              key: EBK_AUTH_OAUTH2_CLIENT_SECRET
         - name: EBK_AUTH_OIDC_PROVIDER_BASE_URL
           value: {{ .Values.oidc.providerBaseUrl }}
         - name: EBK_AUTH_ENABLE_OIDC_DISPLAY_NAME
